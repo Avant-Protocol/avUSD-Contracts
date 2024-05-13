@@ -1,0 +1,12 @@
+# Fuji Testnet
+
+export RPC_URL=https://api.avax-test.network/ext/bc/C/rpc
+export PRIVATE_KEY=
+
+forge script script/FullDeployment.sol --slow --broadcast --chain-id 43113 --etherscan-api-key "verifyContract" --verify --build-info --build-info-path deployment --rpc-url $RPC_URL
+forge script script/StakeV2Deployment.sol --slow --broadcast --chain-id 43113 --etherscan-api-key "verifyContract" --verify --build-info --build-info-path deployment --rpc-url $RPC_URL
+forge script script/WhitelistMinter.sol --slow --broadcast --chain-id 43113 --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url $RPC_URL
+
+forge script script/GrantMinter.sol --slow --broadcast --chain-id 43113 --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url $RPC_URL
+forge script script/DeployMinting.sol --slow --broadcast --chain-id 43113 --etherscan-api-key "verifyContract" --verify --build-info --build-info-path deployment --rpc-url $RPC_URL
+forge script script/WhitelistRedeemers.sol --slow --broadcast --chain-id 43113 --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url $RPC_URL
