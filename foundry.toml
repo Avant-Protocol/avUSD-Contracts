@@ -8,6 +8,7 @@ test = 'test/foundry'
 cache_path = 'forge-cache'
 fs_permissions = [{ access = "read", path = "./out"}]
 evm_version = "shanghai"
+solc_version = "0.8.20"
 
 [fmt]
 tab_width = 2

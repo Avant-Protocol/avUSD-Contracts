@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 /* solhint-disable private-vars-leading-underscore  */
 
@@ -9,6 +9,8 @@ import {Vm} from "forge-std/Vm.sol";
 
 import "../../../../contracts/AvUSD.sol";
 import "../AvUSDMinting.utils.sol";
+
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract AvUSDTest is Test, IAvUSDDefinitions, AvUSDMintingUtils {
   AvUSD internal _avusdToken;
@@ -85,7 +87,7 @@ contract AvUSDTest is Test, IAvUSDDefinitions, AvUSDMintingUtils {
     vm.stopPrank();
 
     vm.prank(_newOwner);
-    vm.expectRevert("Ownable2Step: caller is not the new owner");
+    vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, _newOwner));
     _avusdToken.acceptOwnership();
     assertEq(_avusdToken.owner(), _owner);
     assertNotEq(_avusdToken.owner(), _newOwner);

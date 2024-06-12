@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 /* solhint-disable private-vars-leading-underscore */
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 import "./SingleAdminAccessControl.sol";
 import "./interfaces/IStakedAvUSD.sol";
@@ -249,13 +249,14 @@ contract StakedAvUSD is SingleAdminAccessControl, ReentrancyGuard, ERC20Permit, 
    * minting and burning. Disables transfers from or to of addresses with the FULL_RESTRICTED_STAKER_ROLE role.
    */
 
-  function _beforeTokenTransfer(address from, address to, uint256) internal virtual override {
+  function _update(address from, address to, uint256 value) internal virtual override {
     if (hasRole(FULL_RESTRICTED_STAKER_ROLE, from) && to != address(0)) {
       revert OperationNotAllowed();
     }
     if (hasRole(FULL_RESTRICTED_STAKER_ROLE, to)) {
       revert OperationNotAllowed();
     }
+    super._update(from, to, value);
   }
 
   /**
