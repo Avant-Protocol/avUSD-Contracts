@@ -63,6 +63,8 @@ interface IAvUSDMinting is IAvUSDMintingEvents {
   error MaxRedeemPerBlockExceeded();
   error DelegationNotInitiated();
 
+  function addSupportedAsset(address asset) external;
+  
   function hashOrder(Order calldata order) external view returns (bytes32);
 
   function verifyOrder(Order calldata order, Signature calldata signature) external view returns (bytes32);
