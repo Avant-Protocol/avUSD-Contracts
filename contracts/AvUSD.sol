@@ -17,7 +17,9 @@ contract AvUSD is Ownable2Step, ERC20Burnable, ERC20Permit, IAvUSDDefinitions {
   address public minter;
 
   constructor(address admin) ERC20("avUSD", "avUSD") ERC20Permit("avUSD") Ownable(admin) {
-    if (admin == address(0)) revert ZeroAddressException();
+    /// @dev zero address will be checked on the Ownable constructor
+    // if (admin == address(0)) revert ZeroAddressException();
+    /// @dev Ownable constructor will assign initial ownership
     // _transferOwnership(admin);
   }
 

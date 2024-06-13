@@ -9,6 +9,8 @@ import {console} from "forge-std/console.sol";
 import "forge-std/Test.sol";
 import {SigUtils} from "forge-std/SigUtils.sol";
 
+import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
+
 import "../../../contracts/AvUSD.sol";
 import "../../../contracts/StakedAvUSD.sol";
 import "../../../contracts/interfaces/IAvUSD.sol";
@@ -244,7 +246,8 @@ contract StakedAvUSDBlacklistTest is Test, IERC20Events {
     stakedAvUSD.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
     vm.stopPrank();
 
-    vm.expectRevert(bytes("ERC20: transfer to the zero address"));
+    // vm.expectRevert(bytes("ERC20: transfer to the zero address"));
+    vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InvalidReceiver.selector, address(0)));
     vm.prank(alice);
     stakedAvUSD.transfer(address(0), _amount);
   }
@@ -481,9 +484,8 @@ contract StakedAvUSDBlacklistTest is Test, IERC20Events {
     vm.startPrank(alice);
     stakedAvUSD.addToBlacklist(bob, true);
     assertTrue(stakedAvUSD.hasRole(FULL_RESTRICTED_STAKER_ROLE, bob));
-    vm.expectRevert(
-      "AccessControl: account 0x328809bc894f92807417d2dad6b7c998c1afdac6 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
-    );
+    // vm.expectRevert("AccessControl: account 0x328809bc894f92807417d2dad6b7c998c1afdac6 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, alice, DEFAULT_ADMIN_ROLE));
     stakedAvUSD.redistributeLockedAmount(bob, alice);
     assertEq(stakedAvUSD.balanceOf(bob), 1000 ether);
     vm.stopPrank();
@@ -496,9 +498,8 @@ contract StakedAvUSDBlacklistTest is Test, IERC20Events {
     assertFalse(stakedAvUSD.hasRole(DEFAULT_ADMIN_ROLE, alice));
 
     vm.prank(alice);
-    vm.expectRevert(
-      "AccessControl: account 0x328809bc894f92807417d2dad6b7c998c1afdac6 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
-    );
+    // vm.expectRevert("AccessControl: account 0x328809bc894f92807417d2dad6b7c998c1afdac6 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, alice, DEFAULT_ADMIN_ROLE));
     stakedAvUSD.grantRole(BLACKLIST_MANAGER_ROLE, bob);
   }
 

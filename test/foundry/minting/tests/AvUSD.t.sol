@@ -10,6 +10,7 @@ import {Vm} from "forge-std/Vm.sol";
 import "../../../../contracts/AvUSD.sol";
 import "../AvUSDMinting.utils.sol";
 
+import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract AvUSDTest is Test, IAvUSDDefinitions, AvUSDMintingUtils {
@@ -52,7 +53,7 @@ contract AvUSDTest is Test, IAvUSDDefinitions, AvUSDMintingUtils {
   }
 
   function testCantInitWithNoOwner() public {
-    vm.expectRevert(ZeroAddressExceptionErr);
+    vm.expectRevert();
     new AvUSD(address(0));
   }
 
@@ -106,7 +107,8 @@ contract AvUSDTest is Test, IAvUSDDefinitions, AvUSDMintingUtils {
 
   function testOnlyOwnerCanSetMinter() public {
     vm.prank(_newOwner);
-    vm.expectRevert("Ownable: caller is not the owner");
+    // vm.expectRevert("Ownable: caller is not the owner");
+    vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, _newOwner));
     _avusdToken.setMinter(_newMinter);
     assertEq(_avusdToken.minter(), _minter);
   }
@@ -126,7 +128,8 @@ contract AvUSDTest is Test, IAvUSDDefinitions, AvUSDMintingUtils {
 
   function testMinterCantMintToZeroAddress() public {
     vm.prank(_minter);
-    vm.expectRevert("ERC20: mint to the zero address");
+    // vm.expectRevert("ERC20: mint to the zero address");
+    vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InvalidReceiver.selector, address(0)));
     _avusdToken.mint(address(0), 100);
   }
 
@@ -157,7 +160,8 @@ contract AvUSDTest is Test, IAvUSDDefinitions, AvUSDMintingUtils {
     assertNotEq(_avusdToken.owner(), _owner);
     assertEq(_avusdToken.owner(), _newOwner);
     vm.prank(_owner);
-    vm.expectRevert("Ownable: caller is not the owner");
+    // vm.expectRevert("Ownable: caller is not the owner");
+    vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, _owner));
     _avusdToken.transferOwnership(_newMinter);
     assertEq(_avusdToken.owner(), _newOwner);
   }
@@ -170,7 +174,8 @@ contract AvUSDTest is Test, IAvUSDDefinitions, AvUSDMintingUtils {
     assertNotEq(_avusdToken.owner(), _owner);
     assertEq(_avusdToken.owner(), _newOwner);
     vm.prank(_owner);
-    vm.expectRevert("Ownable: caller is not the owner");
+    // vm.expectRevert("Ownable: caller is not the owner");
+    vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, _owner));
     _avusdToken.setMinter(_newMinter);
     assertEq(_avusdToken.minter(), _minter);
   }
