@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -21,14 +21,14 @@ contract TestnetERC20 is IERC20Permit, ERC20, Ownable {
 
   bytes32 public DOMAIN_SEPARATOR;
 
-  constructor(string memory name, string memory symbol, address owner) ERC20(name, symbol) {
+  constructor(string memory name, string memory symbol, address owner) ERC20(name, symbol) Ownable(owner) {
     uint256 chainId = block.chainid;
 
     DOMAIN_SEPARATOR =
       keccak256(abi.encode(EIP712_DOMAIN, keccak256(bytes(name)), keccak256(EIP712_REVISION), chainId, address(this)));
     //_setupDecimals(decimals);
     require(owner != address(0));
-    transferOwnership(owner);
+    // transferOwnership(owner);
   }
 
   /// @inheritdoc IERC20Permit

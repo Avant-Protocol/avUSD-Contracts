@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.8.10;
+pragma solidity 0.8.20;
 
 interface ISwapper {
   function swap(address _tokenIn, address _tokenOut, uint256 _amountIn, address _to)

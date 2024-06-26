@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8;
+pragma solidity 0.8.20;
 
 /* solhint-disable func-name-mixedcase  */
 
 import {console} from "forge-std/console.sol";
 import "forge-std/Test.sol";
 import {SigUtils} from "forge-std/SigUtils.sol";
+
+import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 
 import "../../../contracts/AvUSD.sol";
 import "../../../contracts/StakedAvUSDV2.sol";
@@ -180,7 +182,8 @@ contract StakedAvUSDV2CooldownTest is Test, IERC20Events {
     avusdToken.mint(alice, amount);
 
     vm.startPrank(alice);
-    vm.expectRevert("ERC20: insufficient allowance");
+    // vm.expectRevert("ERC20: insufficient allowance");
+    vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InsufficientAllowance.selector, stakedAvUSD, 0, amount));
     stakedAvUSD.deposit(amount, alice);
     vm.stopPrank();
 
@@ -212,9 +215,8 @@ contract StakedAvUSDV2CooldownTest is Test, IERC20Events {
     avusdToken.mint(bob, rewardAmount);
     vm.startPrank(bob);
 
-    vm.expectRevert(
-      "AccessControl: account 0x72c7a47c5d01bddf9067eabb345f5daabdead13f is missing role 0xbeec13769b5f410b0584f69811bfd923818456d5edcf426b0e31cf90eed7a3f6"
-    );
+    // vm.expectRevert("AccessControl: account 0x72c7a47c5d01bddf9067eabb345f5daabdead13f is missing role 0xbeec13769b5f410b0584f69811bfd923818456d5edcf426b0e31cf90eed7a3f6");
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, bob, REWARDER_ROLE));
     stakedAvUSD.transferInRewards(rewardAmount);
     vm.stopPrank();
     assertEq(avusdToken.balanceOf(alice), 0);
@@ -277,9 +279,8 @@ contract StakedAvUSDV2CooldownTest is Test, IERC20Events {
 
     vm.startPrank(rewarder);
     avusdToken.approve(address(stakedAvUSD), 1 ether);
-    vm.expectRevert(
-      "AccessControl: account 0x5c664540bc6bb6b22e9d1d3d630c73c02edd94b7 is missing role 0xbeec13769b5f410b0584f69811bfd923818456d5edcf426b0e31cf90eed7a3f6"
-    );
+    // vm.expectRevert("AccessControl: account 0x5c664540bc6bb6b22e9d1d3d630c73c02edd94b7 is missing role 0xbeec13769b5f410b0584f69811bfd923818456d5edcf426b0e31cf90eed7a3f6");
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, rewarder, REWARDER_ROLE));
     stakedAvUSD.transferInRewards(1 ether);
     vm.stopPrank();
 
@@ -425,7 +426,8 @@ contract StakedAvUSDV2CooldownTest is Test, IERC20Events {
 
     avusdToken.approve(address(stakedAvUSD), 100);
 
-    vm.expectRevert("ERC20: transfer amount exceeds balance");
+    // vm.expectRevert("ERC20: transfer amount exceeds balance");
+    vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InsufficientBalance.selector, rewarder, 99, 100));
     stakedAvUSD.transferInRewards(100);
     vm.stopPrank();
   }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8;
+pragma solidity 0.8.20;
 
 import {console} from "forge-std/console.sol";
 import "forge-std/Test.sol";
@@ -144,9 +144,8 @@ contract StakedAvUSDACL is Test, IERC20Events {
     assertTrue(stakedAvUSD.hasRole(DEFAULT_ADMIN_ROLE, newOwner));
     assertFalse(stakedAvUSD.hasRole(DEFAULT_ADMIN_ROLE, owner));
     vm.prank(owner);
-    vm.expectRevert(
-      "AccessControl: account 0xe05fcc23807536bee418f142d19fa0d21bb0cff7 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
-    );
+    // vm.expectRevert("AccessControl: account 0xe05fcc23807536bee418f142d19fa0d21bb0cff7 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, owner, DEFAULT_ADMIN_ROLE));
     stakedAvUSD.grantRole(BLACKLIST_MANAGER_ROLE, alice);
     assertFalse(stakedAvUSD.hasRole(BLACKLIST_MANAGER_ROLE, alice));
   }
@@ -159,9 +158,8 @@ contract StakedAvUSDACL is Test, IERC20Events {
     assertTrue(stakedAvUSD.hasRole(DEFAULT_ADMIN_ROLE, newOwner));
     assertFalse(stakedAvUSD.hasRole(DEFAULT_ADMIN_ROLE, owner));
     vm.prank(owner);
-    vm.expectRevert(
-      "AccessControl: account 0xe05fcc23807536bee418f142d19fa0d21bb0cff7 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
-    );
+    // vm.expectRevert("AccessControl: account 0xe05fcc23807536bee418f142d19fa0d21bb0cff7 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, owner, DEFAULT_ADMIN_ROLE));
     stakedAvUSD.transferAdmin(alice);
     assertFalse(stakedAvUSD.hasRole(DEFAULT_ADMIN_ROLE, alice));
   }
@@ -170,7 +168,6 @@ contract StakedAvUSDACL is Test, IERC20Events {
     vm.prank(owner);
     stakedAvUSD.grantRole(BLACKLIST_MANAGER_ROLE, alice);
     assertTrue(stakedAvUSD.hasRole(BLACKLIST_MANAGER_ROLE, alice));
-
     vm.prank(alice);
     vm.expectRevert(IStakedAvUSD.OperationNotAllowed.selector);
     stakedAvUSD.renounceRole(BLACKLIST_MANAGER_ROLE, alice);

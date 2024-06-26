@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 import "./interfaces/IAvUSDDefinitions.sol";
@@ -16,9 +16,11 @@ import "./interfaces/IAvUSDDefinitions.sol";
 contract AvUSD is Ownable2Step, ERC20Burnable, ERC20Permit, IAvUSDDefinitions {
   address public minter;
 
-  constructor(address admin) ERC20("avUSD", "avUSD") ERC20Permit("avUSD") {
-    if (admin == address(0)) revert ZeroAddressException();
-    _transferOwnership(admin);
+  constructor(address admin) ERC20("avUSD", "avUSD") ERC20Permit("avUSD") Ownable(admin) {
+    /// @dev zero address will be checked on the Ownable constructor
+    // if (admin == address(0)) revert ZeroAddressException();
+    /// @dev Ownable constructor will assign initial ownership
+    // _transferOwnership(admin);
   }
 
   function setMinter(address newMinter) external onlyOwner {

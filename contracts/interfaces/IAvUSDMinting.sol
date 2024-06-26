@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 /* solhint-disable var-name-mixedcase  */
 
@@ -63,6 +63,8 @@ interface IAvUSDMinting is IAvUSDMintingEvents {
   error MaxRedeemPerBlockExceeded();
   error DelegationNotInitiated();
 
+  function addSupportedAsset(address asset) external;
+  
   function hashOrder(Order calldata order) external view returns (bytes32);
 
   function verifyOrder(Order calldata order, Signature calldata signature) external view returns (bytes32);

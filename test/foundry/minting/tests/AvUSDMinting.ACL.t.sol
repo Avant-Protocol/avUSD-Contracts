@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 /* solhint-disable func-name-mixedcase  */
 
 import "../AvUSDMinting.utils.sol";
 import "../../../../contracts/interfaces/ISingleAdminAccessControl.sol";
+
+import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 
 contract AvUSDMintingACLTest is AvUSDMintingUtils {
   function setUp() public override {
@@ -29,13 +31,14 @@ contract AvUSDMintingACLTest is AvUSDMintingUtils {
       redeem_setup(_avusdToMint, _stETHToDeposit, 1, false);
 
     vm.startPrank(minter);
-    vm.expectRevert(
-      bytes(
-        string.concat(
-          "AccessControl: account ", Strings.toHexString(minter), " is missing role ", vm.toString(redeemerRole)
-        )
-      )
-    );
+    // vm.expectRevert(
+    //   bytes(
+    //     string.concat(
+    //       "AccessControl: account ", Strings.toHexString(minter), " is missing role ", vm.toString(redeemerRole)
+    //     )
+    //   )
+    // );
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, minter, redeemerRole));
     AvUSDMintingContract.redeem(redeemOrder, takerSignature2);
   }
 
@@ -48,13 +51,14 @@ contract AvUSDMintingACLTest is AvUSDMintingUtils {
 
     vm.assume(nonMinter != minter);
     vm.startPrank(nonMinter);
-    vm.expectRevert(
-      bytes(
-        string.concat(
-          "AccessControl: account ", Strings.toHexString(nonMinter), " is missing role ", vm.toString(minterRole)
-        )
-      )
-    );
+    // vm.expectRevert(
+    //   bytes(
+    //     string.concat(
+    //       "AccessControl: account ", Strings.toHexString(nonMinter), " is missing role ", vm.toString(minterRole)
+    //     )
+    //   )
+    // );
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, nonMinter, minterRole));
     AvUSDMintingContract.mint(mintOrder, route, takerSignature);
 
     assertEq(stETHToken.balanceOf(benefactor), _stETHToDeposit);
@@ -102,13 +106,14 @@ contract AvUSDMintingACLTest is AvUSDMintingUtils {
     vm.assume(nonMinter != collManager);
     stETHToken.mint(1000, address(AvUSDMintingContract));
 
-    vm.expectRevert(
-      bytes(
-        string.concat(
-          "AccessControl: account ", Strings.toHexString(nonMinter), " is missing role ", vm.toString(collateralManagerRole)
-        )
-      )
-    );
+    // vm.expectRevert(
+    //   bytes(
+    //     string.concat(
+    //       "AccessControl: account ", Strings.toHexString(nonMinter), " is missing role ", vm.toString(collateralManagerRole)
+    //     )
+    //   )
+    // );
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, nonMinter, collateralManagerRole));
     vm.prank(nonMinter);
     AvUSDMintingContract.transferToCustody(beneficiary, address(stETHToken), 1000);
   }
@@ -134,16 +139,17 @@ contract AvUSDMintingACLTest is AvUSDMintingUtils {
   function test_fuzz_not_gatekeeper_cannot_remove_minter_revert(address notGatekeeper) public {
     vm.assume(notGatekeeper != gatekeeper);
     vm.startPrank(notGatekeeper);
-    vm.expectRevert(
-      bytes(
-        string.concat(
-          "AccessControl: account ",
-          Strings.toHexString(notGatekeeper),
-          " is missing role ",
-          vm.toString(gatekeeperRole)
-        )
-      )
-    );
+    // vm.expectRevert(
+    //   bytes(
+    //     string.concat(
+    //       "AccessControl: account ",
+    //       Strings.toHexString(notGatekeeper),
+    //       " is missing role ",
+    //       vm.toString(gatekeeperRole)
+    //     )
+    //   )
+    // );
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, notGatekeeper, gatekeeperRole));
     AvUSDMintingContract.removeMinterRole(minter);
     assertTrue(AvUSDMintingContract.hasRole(minterRole, minter));
   }
@@ -151,29 +157,31 @@ contract AvUSDMintingACLTest is AvUSDMintingUtils {
   function test_fuzz_not_gatekeeper_cannot_remove_redeemer_revert(address notGatekeeper) public {
     vm.assume(notGatekeeper != gatekeeper);
     vm.startPrank(notGatekeeper);
-    vm.expectRevert(
-      bytes(
-        string.concat(
-          "AccessControl: account ",
-          Strings.toHexString(notGatekeeper),
-          " is missing role ",
-          vm.toString(gatekeeperRole)
-        )
-      )
-    );
+    // vm.expectRevert(
+    //   bytes(
+    //     string.concat(
+    //       "AccessControl: account ",
+    //       Strings.toHexString(notGatekeeper),
+    //       " is missing role ",
+    //       vm.toString(gatekeeperRole)
+    //     )
+    //   )
+    // );
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, notGatekeeper, gatekeeperRole));
     AvUSDMintingContract.removeRedeemerRole(redeemer);
     assertTrue(AvUSDMintingContract.hasRole(redeemerRole, redeemer));
   }
 
   function test_gatekeeper_cannot_add_minters_revert() public {
     vm.startPrank(gatekeeper);
-    vm.expectRevert(
-      bytes(
-        string.concat(
-          "AccessControl: account ", Strings.toHexString(gatekeeper), " is missing role ", vm.toString(adminRole)
-        )
-      )
-    );
+    // vm.expectRevert(
+    //   bytes(
+    //     string.concat(
+    //       "AccessControl: account ", Strings.toHexString(gatekeeper), " is missing role ", vm.toString(adminRole)
+    //     )
+    //   )
+    // );
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, gatekeeper, adminRole));
     AvUSDMintingContract.grantRole(minterRole, bob);
     assertFalse(AvUSDMintingContract.hasRole(minterRole, bob), "Bob should lack the minter role");
   }
@@ -213,16 +221,17 @@ contract AvUSDMintingACLTest is AvUSDMintingUtils {
   function test_fuzz_not_gatekeeper_cannot_disable_mintRedeem_revert(address notGatekeeper) public {
     vm.assume(notGatekeeper != gatekeeper);
     vm.startPrank(notGatekeeper);
-    vm.expectRevert(
-      bytes(
-        string.concat(
-          "AccessControl: account ",
-          Strings.toHexString(notGatekeeper),
-          " is missing role ",
-          vm.toString(gatekeeperRole)
-        )
-      )
-    );
+    // vm.expectRevert(
+    //   bytes(
+    //     string.concat(
+    //       "AccessControl: account ",
+    //       Strings.toHexString(notGatekeeper),
+    //       " is missing role ",
+    //       vm.toString(gatekeeperRole)
+    //     )
+    //   )
+    // );
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, notGatekeeper, gatekeeperRole));
     AvUSDMintingContract.disableMintRedeem();
 
     assertTrue(AvUSDMintingContract.maxMintPerBlock() > 0);
@@ -272,13 +281,14 @@ contract AvUSDMintingACLTest is AvUSDMintingUtils {
     test_admin_can_disable_mint(false);
 
     vm.prank(notAdmin);
-    vm.expectRevert(
-      bytes(
-        string.concat(
-          "AccessControl: account ", Strings.toHexString(notAdmin), " is missing role ", vm.toString(adminRole)
-        )
-      )
-    );
+    // vm.expectRevert(
+    //   bytes(
+    //     string.concat(
+    //       "AccessControl: account ", Strings.toHexString(notAdmin), " is missing role ", vm.toString(adminRole)
+    //     )
+    //   )
+    // );
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, notAdmin, adminRole));
     AvUSDMintingContract.setMaxMintPerBlock(_maxMintPerBlock);
 
     maxMint_perBlock_exceeded_revert(1e18);
@@ -292,13 +302,14 @@ contract AvUSDMintingACLTest is AvUSDMintingUtils {
     test_admin_can_disable_redeem(false);
 
     vm.prank(notAdmin);
-    vm.expectRevert(
-      bytes(
-        string.concat(
-          "AccessControl: account ", Strings.toHexString(notAdmin), " is missing role ", vm.toString(adminRole)
-        )
-      )
-    );
+    // vm.expectRevert(
+    //   bytes(
+    //     string.concat(
+    //       "AccessControl: account ", Strings.toHexString(notAdmin), " is missing role ", vm.toString(adminRole)
+    //     )
+    //   )
+    // );
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, notAdmin, adminRole));
     AvUSDMintingContract.setMaxRedeemPerBlock(_maxRedeemPerBlock);
 
     maxRedeem_perBlock_exceeded_revert(1e18);
@@ -365,13 +376,14 @@ contract AvUSDMintingACLTest is AvUSDMintingUtils {
 
     vm.assume(notAdmin != owner);
     vm.startPrank(notAdmin);
-    vm.expectRevert(
-      bytes(
-        string.concat(
-          "AccessControl: account ", Strings.toHexString(notAdmin), " is missing role ", vm.toString(adminRole)
-        )
-      )
-    );
+    // vm.expectRevert(
+    //   bytes(
+    //     string.concat(
+    //       "AccessControl: account ", Strings.toHexString(notAdmin), " is missing role ", vm.toString(adminRole)
+    //     )
+    //   )
+    // );
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, notAdmin, adminRole));
     AvUSDMintingContract.revokeRole(minterRole, bob);
 
     assertTrue(AvUSDMintingContract.hasRole(minterRole, bob), "Bob should maintain the minter role");
@@ -383,13 +395,14 @@ contract AvUSDMintingACLTest is AvUSDMintingUtils {
 
     vm.assume(notAdmin != owner);
     vm.startPrank(notAdmin);
-    vm.expectRevert(
-      bytes(
-        string.concat(
-          "AccessControl: account ", Strings.toHexString(notAdmin), " is missing role ", vm.toString(adminRole)
-        )
-      )
-    );
+    // vm.expectRevert(
+    //   bytes(
+    //     string.concat(
+    //       "AccessControl: account ", Strings.toHexString(notAdmin), " is missing role ", vm.toString(adminRole)
+    //     )
+    //   )
+    // );
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, notAdmin, adminRole));
     AvUSDMintingContract.revokeRole(gatekeeperRole, bob);
 
     assertTrue(AvUSDMintingContract.hasRole(gatekeeperRole, bob), "Bob should maintain the gatekeeper role");
@@ -400,13 +413,14 @@ contract AvUSDMintingACLTest is AvUSDMintingUtils {
   function test_fuzz_notAdmin_cannot_add_minter(address notAdmin) public {
     vm.assume(notAdmin != owner);
     vm.startPrank(notAdmin);
-    vm.expectRevert(
-      bytes(
-        string.concat(
-          "AccessControl: account ", Strings.toHexString(notAdmin), " is missing role ", vm.toString(adminRole)
-        )
-      )
-    );
+    // vm.expectRevert(
+    //   bytes(
+    //     string.concat(
+    //       "AccessControl: account ", Strings.toHexString(notAdmin), " is missing role ", vm.toString(adminRole)
+    //     )
+    //   )
+    // );
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, notAdmin, adminRole));
     AvUSDMintingContract.grantRole(minterRole, bob);
 
     assertFalse(AvUSDMintingContract.hasRole(minterRole, bob), "Bob should lack the minter role");
@@ -416,13 +430,14 @@ contract AvUSDMintingACLTest is AvUSDMintingUtils {
   function test_fuzz_notAdmin_cannot_add_gatekeeper(address notAdmin) public {
     vm.assume(notAdmin != owner);
     vm.startPrank(notAdmin);
-    vm.expectRevert(
-      bytes(
-        string.concat(
-          "AccessControl: account ", Strings.toHexString(notAdmin), " is missing role ", vm.toString(adminRole)
-        )
-      )
-    );
+    // vm.expectRevert(
+    //   bytes(
+    //     string.concat(
+    //       "AccessControl: account ", Strings.toHexString(notAdmin), " is missing role ", vm.toString(adminRole)
+    //     )
+    //   )
+    // );
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, notAdmin, adminRole));
     AvUSDMintingContract.grantRole(gatekeeperRole, bob);
 
     assertFalse(AvUSDMintingContract.hasRole(gatekeeperRole, bob), "Bob should lack the gatekeeper role");
@@ -450,18 +465,16 @@ contract AvUSDMintingACLTest is AvUSDMintingUtils {
 
   function test_grantRole_AdminRoleExternally() public {
     vm.startPrank(randomer);
-    vm.expectRevert(
-      "AccessControl: account 0xc91041eae7bf78e1040f4abd7b29908651f45546 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
-    );
+    // vm.expectRevert("AccessControl: account 0xc91041eae7bf78e1040f4abd7b29908651f45546 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, randomer, adminRole));
     AvUSDMintingContract.grantRole(adminRole, randomer);
     vm.stopPrank();
   }
 
   function test_revokeRole_notAdmin() public {
     vm.startPrank(randomer);
-    vm.expectRevert(
-      "AccessControl: account 0xc91041eae7bf78e1040f4abd7b29908651f45546 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
-    );
+    // vm.expectRevert("AccessControl: account 0xc91041eae7bf78e1040f4abd7b29908651f45546 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, randomer, adminRole));
     AvUSDMintingContract.revokeRole(adminRole, owner);
   }
 
@@ -520,7 +533,8 @@ contract AvUSDMintingACLTest is AvUSDMintingUtils {
 
   function test_renounceRole_forDifferentAccount() public {
     vm.prank(randomer);
-    vm.expectRevert("AccessControl: can only renounce roles for self");
+    // vm.expectRevert("AccessControl: can only renounce roles for self");
+    vm.expectRevert(IAccessControl.AccessControlBadConfirmation.selector);
     AvUSDMintingContract.renounceRole(minterRole, owner);
   }
 
@@ -606,9 +620,8 @@ contract AvUSDMintingACLTest is AvUSDMintingUtils {
     assertTrue(AvUSDMintingContract.hasRole(adminRole, newOwner));
     assertFalse(AvUSDMintingContract.hasRole(adminRole, owner));
     vm.prank(owner);
-    vm.expectRevert(
-      "AccessControl: account 0xe05fcc23807536bee418f142d19fa0d21bb0cff7 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
-    );
+    // vm.expectRevert("AccessControl: account 0xe05fcc23807536bee418f142d19fa0d21bb0cff7 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, owner, adminRole));  
     AvUSDMintingContract.grantRole(gatekeeperRole, bob);
     assertFalse(AvUSDMintingContract.hasRole(gatekeeperRole, bob));
   }
@@ -621,9 +634,8 @@ contract AvUSDMintingACLTest is AvUSDMintingUtils {
     assertTrue(AvUSDMintingContract.hasRole(adminRole, newOwner));
     assertFalse(AvUSDMintingContract.hasRole(adminRole, owner));
     vm.prank(owner);
-    vm.expectRevert(
-      "AccessControl: account 0xe05fcc23807536bee418f142d19fa0d21bb0cff7 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
-    );
+    // vm.expectRevert("AccessControl: account 0xe05fcc23807536bee418f142d19fa0d21bb0cff7 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+    vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, owner, adminRole));
     AvUSDMintingContract.transferAdmin(bob);
     assertFalse(AvUSDMintingContract.hasRole(adminRole, bob));
   }

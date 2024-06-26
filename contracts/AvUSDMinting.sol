@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 /* solhint-disable private-vars-leading-underscore */
 /* solhint-disable var-name-mixedcase */
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 import "./SingleAdminAccessControl.sol";
@@ -382,7 +383,7 @@ contract AvUSDMinting is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGuar
 
   /// @notice hash an Order struct
   function hashOrder(Order calldata order) public view override returns (bytes32) {
-    return ECDSA.toTypedDataHash(getDomainSeparator(), keccak256(encodeOrder(order)));
+    return MessageHashUtils.toTypedDataHash(getDomainSeparator(), keccak256(encodeOrder(order)));
   }
 
   function encodeOrder(Order calldata order) public pure returns (bytes memory) {
