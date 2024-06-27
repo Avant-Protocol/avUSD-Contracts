@@ -59,7 +59,7 @@ contract AvUSDTest is Test, IAvUSDDefinitions, AvUSDMintingUtils {
 
   function testOwnershipCannotBeRenounced() public {
     vm.prank(_owner);
-    vm.expectRevert(CantRenounceOwnershipErr);
+    vm.expectRevert(CannotRenounceOwnershipErr);
     _avusdToken.renounceOwnership();
     assertEq(_avusdToken.owner(), _owner);
     assertNotEq(_avusdToken.owner(), address(0));

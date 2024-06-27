@@ -8,7 +8,7 @@ interface IAvUSDDefinitions {
   /// @notice Zero address not allowed
   error ZeroAddressException();
   /// @notice It's not possible to renounce the ownership
-  error CantRenounceOwnership();
+  error CannotRenounceOwnership();
   /// @notice Only the minter role can perform an action
   error OnlyMinter();
 }

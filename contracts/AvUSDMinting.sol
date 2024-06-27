@@ -408,7 +408,7 @@ contract AvUSDMinting is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGuar
   {
     taker_order_hash = hashOrder(order);
     address signer = ECDSA.recover(taker_order_hash, signature.signature_bytes);
-    if (!(signer == order.benefactor || delegatedSigner[signer][order.benefactor] == DelegatedSignerStatus.ACCEPTED)) {
+    if (signer != order.benefactor && delegatedSigner[signer][order.benefactor] != DelegatedSignerStatus.ACCEPTED) {
       revert InvalidSignature();
     }
     if (order.beneficiary == address(0)) revert InvalidAddress();
