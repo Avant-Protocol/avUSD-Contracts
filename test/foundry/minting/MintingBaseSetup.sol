@@ -97,7 +97,7 @@ contract MintingBaseSetup is Test, IAvUSDMintingEvents, IAvUSDDefinitions {
   // AvUSD error encodings
   bytes internal OnlyMinterErr = abi.encodeWithSelector(IAvUSDDefinitions.OnlyMinter.selector);
   bytes internal ZeroAddressExceptionErr = abi.encodeWithSelector(IAvUSDDefinitions.ZeroAddressException.selector);
-  bytes internal CantRenounceOwnershipErr = abi.encodeWithSelector(IAvUSDDefinitions.CantRenounceOwnership.selector);
+  bytes internal CannotRenounceOwnershipErr = abi.encodeWithSelector(IAvUSDDefinitions.CannotRenounceOwnership.selector);
 
   bytes32 internal constant ROUTE_TYPE = keccak256("Route(address[] addresses,uint256[] ratios)");
   bytes32 internal constant ORDER_TYPE = keccak256(

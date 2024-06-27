@@ -34,6 +34,6 @@ contract AvUSD is Ownable2Step, ERC20Burnable, ERC20Permit, IAvUSDDefinitions {
   }
 
   function renounceOwnership() public view override onlyOwner {
-    revert CantRenounceOwnership();
+    revert CannotRenounceOwnership();
   }
 }
