@@ -24,7 +24,7 @@ contract AvUSD is Ownable2Step, ERC20Burnable, ERC20Permit, IAvUSDDefinitions {
   }
 
   function setMinter(address newMinter) external onlyOwner {
-    emit MinterUpdated(newMinter, minter);
+    emit MinterUpdated(minter, newMinter);
     minter = newMinter;
   }
 
