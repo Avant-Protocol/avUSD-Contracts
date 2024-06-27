@@ -81,6 +81,9 @@ contract StakedAvUSDV2 is IStakedAvUSDCooldown, StakedAvUSD {
   function unstake(address receiver) external {
     UserCooldown storage userCooldown = cooldowns[msg.sender];
     uint256 assets = userCooldown.underlyingAmount;
+    if (assets == 0) {
+      return;
+    }
 
     if (block.timestamp >= userCooldown.cooldownEnd || cooldownDuration == 0) {
       userCooldown.cooldownEnd = 0;
