@@ -289,10 +289,11 @@ contract AvUSDMinting is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGuar
 
   /// @notice The delegated address to confirm delegation
   function confirmDelegatedSigner(address _delegatedBy) external {
-    if (delegatedSigner[msg.sender][_delegatedBy] != DelegatedSignerStatus.PENDING) {
+    mapping(address => DelegatedSignerStatus) storage delegatedStatus = delegatedSigner[msg.sender];
+    if (delegatedStatus[_delegatedBy] != DelegatedSignerStatus.PENDING) {
       revert DelegationNotInitiated();
     }
-    delegatedSigner[msg.sender][_delegatedBy] = DelegatedSignerStatus.ACCEPTED;
+    delegatedStatus[_delegatedBy] = DelegatedSignerStatus.ACCEPTED;
     emit DelegatedSignerAdded(msg.sender, _delegatedBy);
   }
 
@@ -534,14 +535,14 @@ contract AvUSDMinting is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGuar
   function _setMaxMintPerBlock(uint256 _maxMintPerBlock) internal {
     uint256 oldMaxMintPerBlock = maxMintPerBlock;
     maxMintPerBlock = _maxMintPerBlock;
-    emit MaxMintPerBlockChanged(oldMaxMintPerBlock, maxMintPerBlock);
+    emit MaxMintPerBlockChanged(oldMaxMintPerBlock, _maxMintPerBlock);
   }
 
   /// @notice Sets the max redeemPerBlock limit
   function _setMaxRedeemPerBlock(uint256 _maxRedeemPerBlock) internal {
     uint256 oldMaxRedeemPerBlock = maxRedeemPerBlock;
     maxRedeemPerBlock = _maxRedeemPerBlock;
-    emit MaxRedeemPerBlockChanged(oldMaxRedeemPerBlock, maxRedeemPerBlock);
+    emit MaxRedeemPerBlockChanged(oldMaxRedeemPerBlock, _maxRedeemPerBlock);
   }
 
   /// @notice Compute the current domain separator

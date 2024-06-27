@@ -102,8 +102,9 @@ contract StakedAvUSDV2 is IStakedAvUSDCooldown, StakedAvUSD {
 
     shares = previewWithdraw(assets);
 
-    cooldowns[msg.sender].cooldownEnd = uint104(block.timestamp) + cooldownDuration;
-    cooldowns[msg.sender].underlyingAmount += uint152(assets);
+    UserCooldown storage userCooldown = cooldowns[msg.sender];
+    userCooldown.cooldownEnd = uint104(block.timestamp) + cooldownDuration;
+    userCooldown.underlyingAmount += uint152(assets);
 
     _withdraw(msg.sender, address(silo), msg.sender, assets, shares);
   }
@@ -115,8 +116,9 @@ contract StakedAvUSDV2 is IStakedAvUSDCooldown, StakedAvUSD {
 
     assets = previewRedeem(shares);
 
-    cooldowns[msg.sender].cooldownEnd = uint104(block.timestamp) + cooldownDuration;
-    cooldowns[msg.sender].underlyingAmount += uint152(assets);
+    UserCooldown storage userCooldown = cooldowns[msg.sender];
+    userCooldown.cooldownEnd = uint104(block.timestamp) + cooldownDuration;
+    userCooldown.underlyingAmount += uint152(assets);
 
     _withdraw(msg.sender, address(silo), msg.sender, assets, shares);
   }
@@ -130,6 +132,6 @@ contract StakedAvUSDV2 is IStakedAvUSDCooldown, StakedAvUSD {
 
     uint24 previousDuration = cooldownDuration;
     cooldownDuration = duration;
-    emit CooldownDurationUpdated(previousDuration, cooldownDuration);
+    emit CooldownDurationUpdated(previousDuration, duration);
   }
 }
