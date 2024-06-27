@@ -11,10 +11,15 @@ import "../contracts/interfaces/IAvUSDSiloDefinitions.sol";
  * @notice The Silo allows to store avUSD during the stake cooldown process.
  */
 contract AvUSDSilo is IAvUSDSiloDefinitions {
-  address immutable _STAKING_VAULT;
-  IERC20 immutable _AVUSD;
+  address immutable public _STAKING_VAULT;
+  IERC20 immutable public _AVUSD;
+
+  error ZeroAddressError();
 
   constructor(address stakingVault, address avusd) {
+    if (stakingVault == address(0) || avusd == address(0)) {
+      revert ZeroAddressError();
+    }
     _STAKING_VAULT = stakingVault;
     _AVUSD = IERC20(avusd);
   }

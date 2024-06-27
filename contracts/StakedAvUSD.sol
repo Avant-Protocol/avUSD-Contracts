@@ -175,7 +175,7 @@ contract StakedAvUSD is SingleAdminAccessControl, ReentrancyGuard, ERC20Permit, 
 
     uint256 deltaT;
     unchecked {
-      deltaT = (VESTING_PERIOD - timeSinceLastDistribution);
+      deltaT = VESTING_PERIOD - timeSinceLastDistribution;
     }
     return (deltaT * vestingAmount) / VESTING_PERIOD;
   }

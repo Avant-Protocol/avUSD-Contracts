@@ -62,7 +62,7 @@ contract AvUSDMinting is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGuar
   bytes32 private constant EIP712_REVISION = keccak256("1");
 
   /// @notice required ratio for route
-  uint256 private constant ROUTE_REQUIRED_RATIO = 10_000;
+  uint256 private constant ROUTE_REQUIRED_RATIO = 100_00; // 100%
 
   IWAVAX private immutable WAVAX;
 
@@ -437,7 +437,7 @@ contract AvUSDMinting is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGuar
         ++i;
       }
     }
-    return (totalRatio == ROUTE_REQUIRED_RATIO);
+    return totalRatio == ROUTE_REQUIRED_RATIO;
   }
 
   /// @notice verify validity of nonce by checking its presence
