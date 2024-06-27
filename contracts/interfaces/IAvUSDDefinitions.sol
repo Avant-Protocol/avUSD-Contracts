@@ -3,7 +3,7 @@ pragma solidity 0.8.20;
 
 interface IAvUSDDefinitions {
   /// @notice This event is fired when the minter changes
-  event MinterUpdated(address indexed newMinter, address indexed oldMinter);
+  event MinterUpdated(address indexed oldMinter, address indexed newMinter);
 
   /// @notice Zero address not allowed
   error ZeroAddressException();

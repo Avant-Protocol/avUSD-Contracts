@@ -105,6 +105,8 @@ contract AvUSDMinting is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGuar
   /// @param mintAmount The avUSD amount to be minted
   modifier belowMaxMintPerBlock(uint256 mintAmount) {
     if (mintedPerBlock[block.number] + mintAmount > maxMintPerBlock) revert MaxMintPerBlockExceeded();
+    // Add to the minted amount in this block
+    mintedPerBlock[block.number] += mintAmount;
     _;
   }
 
@@ -112,6 +114,8 @@ contract AvUSDMinting is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGuar
   /// @param redeemAmount The avUSD amount to be redeemed
   modifier belowMaxRedeemPerBlock(uint256 redeemAmount) {
     if (redeemedPerBlock[block.number] + redeemAmount > maxRedeemPerBlock) revert MaxRedeemPerBlockExceeded();
+    // Add to the redeemed amount in this block
+    redeemedPerBlock[block.number] += redeemAmount;
     _;
   }
 
@@ -188,8 +192,6 @@ contract AvUSDMinting is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGuar
     verifyOrder(order, signature);
     if (!verifyRoute(route)) revert InvalidRoute();
     _deduplicateOrder(order.benefactor, order.nonce);
-    // Add to the minted amount in this block
-    mintedPerBlock[block.number] += order.avusd_amount;
     _transferCollateral(
       order.collateral_amount, order.collateral_asset, order.benefactor, route.addresses, route.ratios
     );
@@ -219,8 +221,6 @@ contract AvUSDMinting is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGuar
     verifyOrder(order, signature);
     if (!verifyRoute(route)) revert InvalidRoute();
     _deduplicateOrder(order.benefactor, order.nonce);
-    // Add to the minted amount in this block
-    mintedPerBlock[block.number] += order.avusd_amount;
     // Checks that the collateral asset is WAVAX also
     _transferEthCollateral(
       order.collateral_amount, order.collateral_asset, order.benefactor, route.addresses, route.ratios
@@ -251,8 +251,6 @@ contract AvUSDMinting is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGuar
     if (order.order_type != OrderType.REDEEM) revert InvalidOrder();
     verifyOrder(order, signature);
     _deduplicateOrder(order.benefactor, order.nonce);
-    // Add to the redeemed amount in this block
-    redeemedPerBlock[block.number] += order.avusd_amount;
     avusd.burnFrom(order.benefactor, order.avusd_amount);
     _transferToBeneficiary(order.beneficiary, order.collateral_asset, order.collateral_amount);
     emit Redeem(
@@ -486,7 +484,7 @@ contract AvUSDMinting is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGuar
     if (!_supportedAssets.contains(asset) || asset == NATIVE_TOKEN) revert UnsupportedAsset();
     IERC20 token = IERC20(asset);
     uint256 totalTransferred = 0;
-    for (uint256 i = 0; i < addresses.length;) {
+    for (uint256 i = 0; i < addresses.length - 1;) {
       uint256 amountToTransfer = (amount * ratios[i]) / ROUTE_REQUIRED_RATIO;
       token.safeTransferFrom(benefactor, addresses[i], amountToTransfer);
       totalTransferred += amountToTransfer;
@@ -495,9 +493,7 @@ contract AvUSDMinting is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGuar
       }
     }
     uint256 remainingBalance = amount - totalTransferred;
-    if (remainingBalance > 0) {
-      token.safeTransferFrom(benefactor, addresses[addresses.length - 1], remainingBalance);
-    }
+    token.safeTransferFrom(benefactor, addresses[addresses.length - 1], remainingBalance);
   }
 
   /// @notice transfer supported asset to array of custody addresses per defined ratio
@@ -515,7 +511,7 @@ contract AvUSDMinting is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGuar
     WAVAX.withdraw(amount);
 
     uint256 totalTransferred = 0;
-    for (uint256 i = 0; i < addresses.length;) {
+    for (uint256 i = 0; i < addresses.length - 1;) {
       uint256 amountToTransfer = (amount * ratios[i]) / ROUTE_REQUIRED_RATIO;
       (bool success,) = addresses[i].call{value: amountToTransfer}("");
       if (!success) revert TransferFailed();
@@ -525,10 +521,8 @@ contract AvUSDMinting is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGuar
       }
     }
     uint256 remainingBalance = amount - totalTransferred;
-    if (remainingBalance > 0) {
-      (bool success,) = addresses[addresses.length - 1].call{value: remainingBalance}("");
-      if (!success) revert TransferFailed();
-    }
+    (bool success,) = addresses[addresses.length - 1].call{value: remainingBalance}("");
+    if (!success) revert TransferFailed();
   }
 
   /// @notice Sets the max mintPerBlock limit

@@ -71,8 +71,9 @@ abstract contract SingleAdminAccessControl is IERC5313, ISingleAdminAccessContro
    */
   function _grantRole(bytes32 role, address account) internal override returns (bool) {
     if (role == DEFAULT_ADMIN_ROLE) {
-      emit AdminTransferred(_currentDefaultAdmin, account);
-      _revokeRole(DEFAULT_ADMIN_ROLE, _currentDefaultAdmin);
+      address _currentDefaultAdmin_ = _currentDefaultAdmin;
+      emit AdminTransferred(_currentDefaultAdmin_, account);
+      _revokeRole(DEFAULT_ADMIN_ROLE, _currentDefaultAdmin_);
       _currentDefaultAdmin = account;
       delete _pendingDefaultAdmin;
     }
