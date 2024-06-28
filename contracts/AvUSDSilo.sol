@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 /* solhint-disable var-name-mixedcase  */
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../contracts/interfaces/IAvUSDSiloDefinitions.sol";
 
 /**
@@ -11,6 +12,8 @@ import "../contracts/interfaces/IAvUSDSiloDefinitions.sol";
  * @notice The Silo allows to store avUSD during the stake cooldown process.
  */
 contract AvUSDSilo is IAvUSDSiloDefinitions {
+  using SafeERC20 for IERC20;
+
   address immutable public _STAKING_VAULT;
   IERC20 immutable public _AVUSD;
 
@@ -30,6 +33,6 @@ contract AvUSDSilo is IAvUSDSiloDefinitions {
   }
 
   function withdraw(address to, uint256 amount) external onlyStakingVault {
-    _AVUSD.transfer(to, amount);
+    _AVUSD.safeTransfer(to, amount);
   }
 }
