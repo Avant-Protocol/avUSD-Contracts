@@ -441,7 +441,7 @@ contract AvUSDMinting is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGuar
 
   /// @notice verify validity of nonce by checking its presence
   function verifyNonce(address sender, uint256 nonce) public view override returns (uint256, uint256, uint256) {
-    if (nonce == 0) revert InvalidNonce();
+    if (nonce == 0 || nonce >= type(uint64).max) revert InvalidNonce();
     uint256 invalidatorSlot = uint64(nonce) >> 8;
     uint256 invalidatorBit = 1 << uint8(nonce);
     uint256 invalidator = _orderBitmaps[sender][invalidatorSlot];
