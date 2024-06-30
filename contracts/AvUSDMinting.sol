@@ -192,39 +192,16 @@ contract AvUSDMinting is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGuar
     verifyOrder(order, signature);
     if (!verifyRoute(route)) revert InvalidRoute();
     _deduplicateOrder(order.benefactor, order.nonce);
-    _transferCollateral(
-      order.collateral_amount, order.collateral_asset, order.benefactor, route.addresses, route.ratios
-    );
-    avusd.mint(order.beneficiary, order.avusd_amount);
-    emit Mint(
-      msg.sender,
-      order.benefactor,
-      order.beneficiary,
-      order.collateral_asset,
-      order.collateral_amount,
-      order.avusd_amount
-    );
-  }
 
-  /**
-   * @notice Mint stablecoins from assets
-   * @param order struct containing order details and confirmation from server
-   * @param signature signature of the taker
-   */
-  function mintWAVAX(Order calldata order, Route calldata route, Signature calldata signature)
-    external
-    nonReentrant
-    onlyRole(MINTER_ROLE)
-    belowMaxMintPerBlock(order.avusd_amount)
-  {
-    if (order.order_type != OrderType.MINT) revert InvalidOrder();
-    verifyOrder(order, signature);
-    if (!verifyRoute(route)) revert InvalidRoute();
-    _deduplicateOrder(order.benefactor, order.nonce);
-    // Checks that the collateral asset is WAVAX also
-    _transferEthCollateral(
-      order.collateral_amount, order.collateral_asset, order.benefactor, route.addresses, route.ratios
-    );
+    if (order.collateral_asset == address(WAVAX)) {
+      _transferEthCollateral(
+        order.collateral_amount, order.collateral_asset, order.benefactor, route.addresses, route.ratios
+      );
+    } else {
+      _transferCollateral(
+        order.collateral_amount, order.collateral_asset, order.benefactor, route.addresses, route.ratios
+      );
+    }
     avusd.mint(order.beneficiary, order.avusd_amount);
     emit Mint(
       msg.sender,
@@ -504,10 +481,11 @@ contract AvUSDMinting is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGuar
     address[] calldata addresses,
     uint256[] calldata ratios
   ) internal {
-    if (!_supportedAssets.contains(asset) || asset == NATIVE_TOKEN || asset != address(WAVAX)) revert UnsupportedAsset();
+    if (!_supportedAssets.contains(asset) || asset != address(WAVAX)) revert UnsupportedAsset();
     IERC20 token = IERC20(asset);
     token.safeTransferFrom(benefactor, address(this), amount);
 
+    // unwrap
     WAVAX.withdraw(amount);
 
     uint256 totalTransferred = 0;
