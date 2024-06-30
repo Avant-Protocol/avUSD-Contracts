@@ -75,7 +75,5 @@ interface IAvUSDMinting is IAvUSDMintingEvents {
 
   function mint(Order calldata order, Route calldata route, Signature calldata signature) external;
 
-  function mintWAVAX(Order calldata order, Route calldata route, Signature calldata signature) external;
-
   function redeem(Order calldata order, Signature calldata signature) external;
 }
