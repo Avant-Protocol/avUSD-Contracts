@@ -15,7 +15,7 @@
 `StakedAvUSDV2.sol`, the contract it extends, `StakedAvUSD.sol` and the additional contract it creates `AvUSDSilo.sol`
 
 ## Gitbook
-To get an overview of Avant, please visit our gitbook: _TBD_
+To get an overview of Avant, please visit our gitbook: https://docs.avantprotocol.com/
 
 ## Goals
 
@@ -43,9 +43,9 @@ The `minter` address is the only address that has the ability to mint avUSD. Thi
 
 `AvUSDMinting.sol` is the contract and address that the `minter` variable in `AvUSD.sol` points to. When users mint avUSD with stETH (or other collateral) or redeems collateral for avUSD, this contract is invoked.
 
-The primary functions used in this contract is `mint()` and `redeen()`. Users who call this contract are all within avUSD. When outside users wishes to mint or redeem, they perform an EIP712 signature based on an offchain price we provided to them. They sign the order and sends it back to Avant's backend, where we run a series of checks and are the ones who take their signed order and put them on chain.
+The primary functions used in this contract is `mint()` and `redeem()`. Users who call this contract are all within avUSD. When outside users wishes to mint or redeem, they perform an EIP712 signature based on an offchain price we provided to them. They sign the order and sends it back to Avant's backend, where we run a series of checks and are the ones who take their signed order and put them on chain.
 
-By design, Avant will be the only ones calling `mint()`,`redeen()` and other functions in this contract.
+By design, Avant will be the only ones calling `mint()`,`redeem()` and other functions in this contract.
 
 ### Minting
 
