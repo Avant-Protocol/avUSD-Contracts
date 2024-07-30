@@ -126,7 +126,7 @@ contract AvUSDMintingCoreTest is AvUSDMintingUtils {
   }
 
   function test_multipleValid_custodyRatios_addresses() public {
-    uint256 _smallUsdeToMint = 1.75 * 10 ** 23;
+    uint256 _smallAvusdToMint = 1.75 * 10 ** 23;
     IAvUSDMinting.Order memory order = IAvUSDMinting.Order({
       order_type: IAvUSDMinting.OrderType.MINT,
       expiry: block.timestamp + 10 minutes,
@@ -135,7 +135,7 @@ contract AvUSDMintingCoreTest is AvUSDMintingUtils {
       beneficiary: beneficiary,
       collateral_asset: address(stETHToken),
       collateral_amount: _stETHToDeposit,
-      avusd_amount: _smallUsdeToMint
+      avusd_amount: _smallAvusdToMint
     });
 
     address[] memory targets = new address[](3);
@@ -172,7 +172,7 @@ contract AvUSDMintingCoreTest is AvUSDMintingUtils {
     AvUSDMintingContract.mint(order, route, takerSignature);
 
     assertEq(stETHToken.balanceOf(benefactor), 0);
-    assertEq(avusdToken.balanceOf(beneficiary), _smallUsdeToMint);
+    assertEq(avusdToken.balanceOf(beneficiary), _smallAvusdToMint);
 
     assertEq(stETHToken.balanceOf(address(custodian1)), (_stETHToDeposit * 4) / 10);
     assertEq(stETHToken.balanceOf(address(custodian2)), (_stETHToDeposit * 3) / 10);
