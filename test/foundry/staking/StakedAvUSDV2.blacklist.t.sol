@@ -48,7 +48,7 @@ contract StakedAvUSDV2CooldownBlacklistTest is Test, IERC20Events {
     greg = makeAddr("greg");
     owner = makeAddr("owner");
 
-    avusdToken.setMinter(address(this));
+    avusdToken.setMinter(address(this), true);
 
     vm.startPrank(owner);
     stakedAvUSD = new StakedAvUSDV2(IAvUSD(address(avusdToken)), makeAddr('rewarder'), owner);

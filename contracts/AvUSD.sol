@@ -14,7 +14,8 @@ import "./interfaces/IAvUSDDefinitions.sol";
  * @dev Only a single approved minter can mint new tokens
  */
 contract AvUSD is Ownable2Step, ERC20Burnable, ERC20Permit, IAvUSDDefinitions {
-  address public minter;
+
+  mapping(address => bool) public minters;
 
   constructor(address admin) ERC20("avUSD", "avUSD") ERC20Permit("avUSD") Ownable(admin) {
     /// @dev zero address will be checked on the Ownable constructor
@@ -23,13 +24,13 @@ contract AvUSD is Ownable2Step, ERC20Burnable, ERC20Permit, IAvUSDDefinitions {
     // _transferOwnership(admin);
   }
 
-  function setMinter(address newMinter) external onlyOwner {
-    emit MinterUpdated(minter, newMinter);
-    minter = newMinter;
+  function setMinter(address minter, bool isMinter) external onlyOwner {
+    emit MinterUpdated(minter, isMinter);
+    minters[minter] = isMinter;
   }
 
   function mint(address to, uint256 amount) external {
-    if (msg.sender != minter) revert OnlyMinter();
+    if (!minters[msg.sender]) revert OnlyMinter();
     _mint(to, amount);
   }
 

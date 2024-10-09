@@ -57,7 +57,7 @@ contract StakedAvUSDV2CooldownTest is Test, IERC20Events {
     sigUtilsAvUSD = new SigUtils(avusdToken.DOMAIN_SEPARATOR());
     sigUtilsStakedAvUSD = new SigUtils(stakedAvUSD.DOMAIN_SEPARATOR());
 
-    avusdToken.setMinter(address(this));
+    avusdToken.setMinter(address(this), true);
   }
 
   function test_constructor() public {

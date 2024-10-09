@@ -52,7 +52,7 @@ contract DeployMinting is Script, DeploymentUtils {
     console.log("Deployed AvUSDMinting to %s", address(avUSDMintingContract));
 
     // give minting contract AvUSD minter role
-    iAvUSD.setMinter(address(avUSDMintingContract));
+    iAvUSD.setMinter(address(avUSDMintingContract), true);
 
     // Checks the minting owner and admin
     _utilsIsOwner(deployerAddress, address(avUSDMintingContract));

@@ -230,7 +230,7 @@ contract MintingBaseSetup is Test, IAvUSDMintingEvents, IAvUSDDefinitions {
     stETHToken.mint(_stETHToDeposit, benefactor);
     vm.stopPrank();
 
-    avusdToken.setMinter(address(AvUSDMintingContract));
+    avusdToken.setMinter(address(AvUSDMintingContract), true);
   }
 
   function _generateRouteTypeHash(IAvUSDMinting.Route memory route) internal pure returns (bytes32) {

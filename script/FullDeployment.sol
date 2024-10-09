@@ -160,7 +160,7 @@ contract FullDeployment is Script, DeploymentUtils {
     console.log("Deployed AvUSDMinting to %s", address(contracts.avUSDMintingContract));
 
     // give minting contract AvUSD minter role
-    contracts.AvUSDToken.setMinter(address(contracts.avUSDMintingContract));
+    contracts.AvUSDToken.setMinter(address(contracts.avUSDMintingContract), true);
 
     // Checks the minting owner and admin
     _utilsIsOwner(deployerAddress, address(contracts.avUSDMintingContract));

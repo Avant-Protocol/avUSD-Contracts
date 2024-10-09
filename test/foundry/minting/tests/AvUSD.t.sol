@@ -44,12 +44,12 @@ contract AvUSDTest is Test, IAvUSDDefinitions, AvUSDMintingUtils {
 
     _avusdToken = new AvUSD(_owner);
     vm.prank(_owner);
-    _avusdToken.setMinter(_minter);
+    _avusdToken.setMinter(_minter, true);
   }
 
   function testCorrectInitialConfig() public {
     assertEq(_avusdToken.owner(), _owner);
-    assertEq(_avusdToken.minter(), _minter);
+    assertEq(_avusdToken.minters(_minter), true);
   }
 
   function testCantInitWithNoOwner() public {
@@ -99,18 +99,19 @@ contract AvUSDTest is Test, IAvUSDDefinitions, AvUSDMintingUtils {
     _avusdToken.transferOwnership(_newOwner);
     vm.startPrank(_newOwner);
     _avusdToken.acceptOwnership();
-    _avusdToken.setMinter(_newMinter);
+    _avusdToken.setMinter(_minter, false);
+    _avusdToken.setMinter(_newMinter, true);
     vm.stopPrank();
-    assertEq(_avusdToken.minter(), _newMinter);
-    assertNotEq(_avusdToken.minter(), _minter);
+    assertEq(_avusdToken.minters(_newMinter), true);
+    assertEq(_avusdToken.minters(_minter), false);
   }
 
   function testOnlyOwnerCanSetMinter() public {
     vm.prank(_newOwner);
     // vm.expectRevert("Ownable: caller is not the owner");
     vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, _newOwner));
-    _avusdToken.setMinter(_newMinter);
-    assertEq(_avusdToken.minter(), _minter);
+    _avusdToken.setMinter(_newMinter, true);
+    assertEq(_avusdToken.minters(_newMinter), false);
   }
 
   function testOwnerCantMint() public {
@@ -136,7 +137,7 @@ contract AvUSDTest is Test, IAvUSDDefinitions, AvUSDMintingUtils {
   function testNewMinterCanMint() public {
     assertEq(_avusdToken.balanceOf(_newMinter), 0);
     vm.prank(_owner);
-    _avusdToken.setMinter(_newMinter);
+    _avusdToken.setMinter(_newMinter, true);
     vm.prank(_newMinter);
     _avusdToken.mint(_newMinter, 100);
     assertEq(_avusdToken.balanceOf(_newMinter), 100);
@@ -144,8 +145,11 @@ contract AvUSDTest is Test, IAvUSDDefinitions, AvUSDMintingUtils {
 
   function testOldMinterCantMint() public {
     assertEq(_avusdToken.balanceOf(_newMinter), 0);
+    assertEq(_avusdToken.owner(), _owner);
     vm.prank(_owner);
-    _avusdToken.setMinter(_newMinter);
+    _avusdToken.setMinter(_minter, false);
+    vm.prank(_owner);
+    _avusdToken.setMinter(_newMinter, true);
     vm.prank(_minter);
     vm.expectRevert(OnlyMinterErr);
     _avusdToken.mint(_newMinter, 100);
@@ -176,7 +180,7 @@ contract AvUSDTest is Test, IAvUSDDefinitions, AvUSDMintingUtils {
     vm.prank(_owner);
     // vm.expectRevert("Ownable: caller is not the owner");
     vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, _owner));
-    _avusdToken.setMinter(_newMinter);
-    assertEq(_avusdToken.minter(), _minter);
+    _avusdToken.setMinter(_newMinter, true);
+    assertEq(_avusdToken.minters(_newMinter), false);
   }
 }

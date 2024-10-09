@@ -20,7 +20,7 @@ contract GrantMinter is Script {
 
     // update array size and grantee addresses
 
-    avusdToken.setMinter(avUSDMintingAddress);
+    avusdToken.setMinter(avUSDMintingAddress, true);
 
     vm.stopBroadcast();
   }

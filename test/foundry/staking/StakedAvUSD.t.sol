@@ -52,7 +52,7 @@ contract StakedAvUSDTest is Test, IERC20Events {
     sigUtilsAvUSD = new SigUtils(avusdToken.DOMAIN_SEPARATOR());
     sigUtilsStakedAvUSD = new SigUtils(stakedAvUSD.DOMAIN_SEPARATOR());
 
-    avusdToken.setMinter(address(this));
+    avusdToken.setMinter(address(this), true);
   }
 
   function _mintApproveDeposit(address staker, uint256 amount) internal {

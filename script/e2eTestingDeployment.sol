@@ -18,9 +18,10 @@ contract E2eTestingDeployment is Script, FullDeployment {
     Contracts memory deployedContracts = deployment(deployerPrivateKey);
 
     vm.startBroadcast(deployerPrivateKey);
-    deployedContracts.AvUSDToken.setMinter(deployer);
+    deployedContracts.AvUSDToken.setMinter(deployer, true);
     deployedContracts.AvUSDToken.mint(testerAddress, _DEFAULT_MOCK_TOKEN_PRICE * _DEFAULT_TEST_DEPOSIT_SIZE);
-    deployedContracts.AvUSDToken.setMinter(address(deployedContracts.avUSDMintingContract));
+    deployedContracts.AvUSDToken.setMinter(deployer, false);
+    deployedContracts.AvUSDToken.setMinter(address(deployedContracts.avUSDMintingContract), true);
     vm.stopBroadcast();
   }
 }

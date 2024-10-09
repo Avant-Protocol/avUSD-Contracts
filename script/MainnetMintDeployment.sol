@@ -64,7 +64,7 @@ contract MainnetMintDeployment is Script, DeploymentUtils {
     );
 
     // Set minter role
-    contracts.AvUSDToken.setMinter(address(contracts.avUSDMintingContract));
+    contracts.AvUSDToken.setMinter(address(contracts.avUSDMintingContract), true);
 
     console.log("AvUSD Deployed");
     vm.stopBroadcast();
