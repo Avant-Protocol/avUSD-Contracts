@@ -5,3 +5,6 @@ forge-std/=lib/forge-std/src/
 @aave/core-v3=lib/aave-v3-core/
 @bgd-helpers=lib/aave-helpers/src/
 solidity-utils/=lib/aave-helpers/lib/solidity-utils/src/
+@layerzerolabs/lz-evm-oapp-v2/=lib/LayerZero-v2/
+@layerzerolabs/lz-evm-protocol-v2/=lib/LayerZero-v2/protocol
+@layerzerolabs/lz-evm-messagelib-v2/=lib/LayerZero-v2/messagelib
