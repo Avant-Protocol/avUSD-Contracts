@@ -1,17 +1,25 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity 0.8.20;
 
+import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
+import {IAny2EVMMessageReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IAny2EVMMessageReceiver.sol";
+import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
+
 import {OApp, Origin, MessagingFee} from "@layerzerolabs/lz-evm-oapp-v2/oapp/contracts/oapp/OApp.sol";
+import {MessagingReceipt} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
+
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
-import {IAny2EVMMessageReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IAny2EVMMessageReceiver.sol";
+
+import {IAvUSD} from "./interfaces/IAvUSD.sol";
 
 contract AvUSDBridging is
-    ReentrancyGuard, //                                             Send (bridge) function protection
-    OApp, //                                                        LayerZero contract structure
-    IAny2EVMMessageReceiver, // ──────────────────────────────────╮ CCIP message receiver interface
-    IERC165 // ───────────────────────────────────────────────────╯ CCIP introspection for the message receiver
+    ReentrancyGuard, //                                            Bridge (send) function protection
+    OApp, //                                                       LayerZero contract structure
+    IAny2EVMMessageReceiver, // ─────────────────────────────────╮ CCIP message receiver interface
+    IERC165 // ──────────────────────────────────────────────────╯ CCIP introspection for the message receiver
 {
     // ┌─────────────────────────────────────────────────────────────┐
     // | Events                                                      |
@@ -37,7 +45,8 @@ contract AvUSDBridging is
     event CCIPRouterUpdated(address newCCIPRouter);
 
     event LZMessageReceived(
-        uint64 srcEid,
+        bytes32 guid,
+        uint32 srcEid,
         address tokenSender,
         address tokenReceiver,
         uint256 tokenAmount,
@@ -45,7 +54,7 @@ contract AvUSDBridging is
     );
     event LZMessageSent(
         bytes32 guid,
-        bytes32 dstEid,
+        uint32 dstEid,
         address tokenSender,
         address tokenReceiver,
         uint256 tokenAmount,
@@ -60,24 +69,13 @@ contract AvUSDBridging is
     error NotAuthorizedError();
 
     // ┌─────────────────────────────────────────────────────────────┐
-    // | Modifiers                                                   |
-    // └─────────────────────────────────────────────────────────────┘
-
-    modifier onlyCCIPRouter() {
-        if (msg.sender != ccipRouter) {
-            revert NotAuthorizedError();
-        }
-        _;
-    }
-
-    // ┌─────────────────────────────────────────────────────────────┐
     // | State                                                       |
     // └─────────────────────────────────────────────────────────────┘
 
     address public ccipRouter; // ───────────────────────────────╮ address for Chainlink's CCIP router on the current chain
     mapping(uint64 => address) public ccipWhitelistedPeers; // ──╯ CCIP Chain Selector => Address on the peer chain
 
-    ERC20Burnable public avUsd; // ──────────────────────────────╮ avUSD stablecoin
+    IAvUSD public avUsd; // ─────────────────────────────────────╮ avUSD stablecoin
     IERC4626 public savUsd; // ──────────────────────────────────╯ staked avUSD vault
 
     // ┌─────────────────────────────────────────────────────────────┐
@@ -94,8 +92,8 @@ contract AvUSDBridging is
         if (_avUsd == address(0) || _savUsd == address(0)) {
             revert InvalidParamError();
         }
-        avUsd = _avUsd;
-        savUsd = _savUsd;
+        avUsd = IAvUSD(_avUsd);
+        savUsd = IERC4626(_savUsd);
         ccipRouter = _ccipRouter;
     }
 
@@ -130,7 +128,7 @@ contract AvUSDBridging is
         bool _isStaked,
         bytes memory _options
     ) external view returns (uint256) {
-        if (endpoint == address(0)) {
+        if (address(endpoint) == address(0)) {
             revert NotAuthorizedError();
         }
         bool _payInLzToken = false;
@@ -140,13 +138,13 @@ contract AvUSDBridging is
             _tokenAmount,
             _isStaked
         );
-        (uint256 _nativeFee, ) = _quote(
-            _dstId,
+        MessagingFee memory _fee = _quote(
+            _dstEid,
             _message,
             _options,
             _payInLzToken
         );
-        return _nativeFee;
+        return _fee.nativeFee;
     }
 
     function sendWithLayerzero(
@@ -156,7 +154,7 @@ contract AvUSDBridging is
         bool _isStaked,
         bytes calldata _options
     ) external payable nonReentrant {
-        if (endpoint == address(0)) {
+        if (address(endpoint) == address(0)) {
             revert NotAuthorizedError();
         }
 
@@ -169,7 +167,7 @@ contract AvUSDBridging is
             _isStaked
         );
 
-        (bytes32 _guid, , ) = _lzSend(
+        MessagingReceipt memory _receipt = _lzSend(
             _dstEid,
             _message,
             _options,
@@ -180,7 +178,7 @@ contract AvUSDBridging is
         );
 
         emit LZMessageSent(
-            _guid,
+            _receipt.guid,
             _dstEid,
             msg.sender,
             _tokenReceiver,
@@ -285,7 +283,10 @@ contract AvUSDBridging is
     /// @inheritdoc IAny2EVMMessageReceiver
     function ccipReceive(
         Client.Any2EVMMessage calldata _message
-    ) external override onlyCCIPRouter {
+    ) external override {
+        if (msg.sender != ccipRouter) {
+            revert NotAuthorizedError();
+        }
         address _messageSender = abi.decode(_message.sender, (address));
         if (
             ccipWhitelistedPeers[_message.sourceChainSelector] != _messageSender
@@ -299,12 +300,13 @@ contract AvUSDBridging is
             bool _isStaked
         ) = abi.decode(_message.data, (address, address, uint256, bool));
 
-        emit MessageReceived(
+        emit CCIPMessageReceived(
             _message.messageId,
             _message.sourceChainSelector,
             _tokenSender,
             _tokenReceiver,
-            _tokenAmount
+            _tokenAmount,
+            _isStaked
         );
 
         _mintWithOptionalStake(_tokenReceiver, _tokenAmount, _isStaked);
