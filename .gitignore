@@ -7,3 +7,4 @@ deployments
 broadcast/
 
 .env
+node_modules

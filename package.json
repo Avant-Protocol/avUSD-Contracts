@@ -29,8 +29,8 @@
     "test": "forge test -vvv",
     "test:coverage": "forge coverage"
   },
-  "dependencies": {},
   "devDependencies": {
+    "@chainlink/contracts-ccip": "^1.5.0",
     "cross-env": "7.0.0",
     "dotenv": "16.0.3",
     "eslint": "8.29.0",
