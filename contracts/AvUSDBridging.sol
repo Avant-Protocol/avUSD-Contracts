@@ -95,6 +95,8 @@ contract AvUSDBridging is
         avUsd = IAvUSD(_avUsd);
         savUsd = IERC4626(_savUsd);
         ccipRouter = _ccipRouter;
+        /// @dev allowance for StakedAvUSD to be able to capture AvUSD when depositing
+        avUsd.approve(_savUsd, type(uint256).max);
     }
 
     // ┌─────────────────────────────────────────────────────────────┐

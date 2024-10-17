@@ -10,3 +10,45 @@ forge script script/WhitelistMinter.sol --slow --broadcast --chain-id 43113 --et
 forge script script/GrantMinter.sol --slow --broadcast --chain-id 43113 --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url $RPC_URL
 forge script script/DeployMinting.sol --slow --broadcast --chain-id 43113 --etherscan-api-key "verifyContract" --verify --build-info --build-info-path deployment --rpc-url $RPC_URL
 forge script script/WhitelistRedeemers.sol --slow --broadcast --chain-id 43113 --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url $RPC_URL
+
+
+
+
+
+
+forge script script/bridging/BridgeTestFullDeployment.sol --slow --broadcast --chain-id 421614 --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url "https://sepolia-rollup.arbitrum.io/rpc"
+
+[Arbitrum Sepolia]
+Deployed AvUSD to 0x70Bd20Fd83e55720e31a15d7e00005335145Aa91
+Deployed StakedAvUSD to 0x2ec9036BA625801866f313Cf5C007B4189B547f2
+Deployed MockToken to 0x1e5A613A720b7aE5bc68BE825a999Cb6f2dD0016
+Deployed AvUSDMinting to 0x4D18ae2ecba2804fFa7C6759D8c7d8B78343db03
+Deployed AvUSDBridging to 0xb6a98600a66C35985958C4DDA1599A4C15Ff9D70
+
+CCIP chainSelector to OP Sepolia -> 5224473277236331295
+setCCIPWhitelistedPeer("5224473277236331295", "0xE88EDcc956Cb979bF2d823EeFa1f7C6d69169285")
+layerzero EID of OP Sepolia -> 40232
+setPeer(40232, ethers.zeroPadValue("0xE88EDcc956Cb979bF2d823EeFa1f7C6d69169285", 32))
+
+await b.quoteSendFeeWithLayerzero(40232, "0x19596e1D6cd97916514B5DBaA4730781eFE49975", "50000000000000000000", false, "0x000301001101000000000000000000000000001e8480")
+>87585188821179
+await b.sendWithLayerzero(40232, "0x19596e1D6cd97916514B5DBaA4730781eFE49975", "50000000000000000000", false, "0x000301001101000000000000000000000000001e8480", {value: "87585188821179"})
+txHash: 0x8663ffcb398ca1f2ab399a61847a122b9b7fada1d00632e10e82edb41890f842
+
+await b.quoteSendFeeWithCCIP("5224473277236331295", "0x19596e1D6cd97916514B5DBaA4730781eFE49975", "50000000000000000000", false)
+>41248506478866
+await b.sendWithCCIP("5224473277236331295", "0x19596e1D6cd97916514B5DBaA4730781eFE49975", "50000000000000000000", false)
+
+
+forge script script/bridging/BridgeTestFullDeployment.sol --slow --broadcast --chain-id 11155420 --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url "https://sepolia.optimism.io"
+
+[Optimism Sepolia]
+Deployed AvUSD to 0x24CED57dBe3Ce2080A8D4c94E768A0573d7a5f7A
+Deployed StakedAvUSD to 0x0d441bD787F7bF026dEf59e9e9D9F880fE59B5b4
+Deployed MockToken to 0x337c6D715fac1f8013d78567e154Ed38060ca2A6
+Deployed AvUSDMinting to 0xeebd674d85E02cF41c28eC87e4FA89F5a51554D7
+Deployed AvUSDBridging to 0xE88EDcc956Cb979bF2d823EeFa1f7C6d69169285
+CCIP chainSelector to ARB Sepolia -> 3478487238524512106
+setCCIPWhitelistedPeer("3478487238524512106", "0xb6a98600a66C35985958C4DDA1599A4C15Ff9D70")
+layerzero EID of ARB Sepolia -> 40231
+setPeer(40231, ethers.zeroPadValue("0xb6a98600a66C35985958C4DDA1599A4C15Ff9D70", 32))
