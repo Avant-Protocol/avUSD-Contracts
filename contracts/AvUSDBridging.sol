@@ -75,13 +75,22 @@ contract AvUSDBridging is
     address public ccipRouter; // ───────────────────────────────╮ address for Chainlink's CCIP router on the current chain
     mapping(uint64 => address) public ccipWhitelistedPeers; // ──╯ CCIP Chain Selector => Address on the peer chain
 
-    IAvUSD public avUsd; // ─────────────────────────────────────╮ avUSD stablecoin
-    IERC4626 public savUsd; // ──────────────────────────────────╯ staked avUSD vault
+    IAvUSD public immutable avUsd; // ───────────────────────────╮ avUSD stablecoin
+    IERC4626 public immutable savUsd; // ────────────────────────╯ staked avUSD vault
 
     // ┌─────────────────────────────────────────────────────────────┐
     // | Constructor                                                 |
     // └─────────────────────────────────────────────────────────────┘
 
+    /**
+     * @notice Constructor to initialize the AvUSDBridging contract.
+     * @param _avUsd Address of the avUSD token contract.
+     * @param _savUsd Address of the savUSD (staked avUSD) vault contract.
+     * @param _lzEndpoint LayerZero endpoint for message sending/receiving.
+     * @param _ccipRouter Chainlink's CCIP router address for message handling.
+     * @param _owner Address of the contract owner.
+     * @dev Initializes the contract, sets up the LayerZero and CCIP routers, and approves the staked avUSD vault to manage avUSD tokens.
+     */
     constructor(
         address _avUsd,
         address _savUsd,
@@ -103,7 +112,13 @@ contract AvUSDBridging is
     // | Admin functions                                             |
     // └─────────────────────────────────────────────────────────────┘
 
-    /// @dev allow for a zero address (which becomes an 'unset')
+    /**
+     * @notice Sets a whitelisted peer for a specified chain using its chain selector.
+     * @param _chainSelector The chain selector for which the peer is being set.
+     * @param _peer The address of the whitelisted peer on the destination chain.
+     * @dev Only callable by the contract owner. Allows for cross-chain messages to/from the whitelisted peer.
+     * @dev Zero address is allowed (which becomes an 'unset').
+     */
     function setCCIPWhitelistedPeer(
         uint64 _chainSelector,
         address _peer
@@ -112,7 +127,12 @@ contract AvUSDBridging is
         emit CCIPPeerUpdated(_chainSelector, _peer);
     }
 
-    /// @dev allow for a zero address (which becomes an 'unset')
+    /**
+     * @notice Sets the CCIP router address.
+     * @param _ccipRouter The new address of the CCIP router.
+     * @dev Only callable by the contract owner. Setting to zero disables CCIP bridging.
+     * @dev Zero address is allowed (which becomes an 'unset').
+     */
     function setCCIPRouter(address _ccipRouter) external onlyOwner {
         ccipRouter = _ccipRouter;
         emit CCIPRouterUpdated(_ccipRouter);
@@ -122,7 +142,17 @@ contract AvUSDBridging is
     // | Layerzero functions                                         |
     // └─────────────────────────────────────────────────────────────┘
 
-    /// @dev fee amount is calculated in the native token of the current chain
+    /**
+     * @notice Quotes the fee for sending a message with LayerZero.
+     * @param _dstEid The destination chain's LayerZero endpoint ID.
+     * @param _tokenReceiver The receiver's address on the destination chain.
+     * @param _tokenAmount The amount of tokens being transferred.
+     * @param _isStaked A boolean indicating if the tokens are staked or unstaked.
+     * @param _options Additional LayerZero message options (e.g., gas limit).
+     * @return The quoted fee in the native token of the current chain.
+     * @dev This function calculates the fee required to send a message to a LayerZero endpoint.
+     * @dev The fee amount is calculated in the native token of the current chain.
+     */
     function quoteSendFeeWithLayerzero(
         uint32 _dstEid,
         address _tokenReceiver,
@@ -149,6 +179,15 @@ contract AvUSDBridging is
         return _fee.nativeFee;
     }
 
+    /**
+     * @notice Sends tokens across chains using LayerZero protocol.
+     * @param _dstEid The destination chain's LayerZero endpoint ID.
+     * @param _tokenReceiver The receiver's address on the destination chain.
+     * @param _tokenAmount The amount of tokens being transferred.
+     * @param _isStaked A boolean indicating if the tokens are staked or unstaked.
+     * @param _options Additional LayerZero message options (e.g., gas limit).
+     * @dev Transfers tokens across chains, burns them on the current chain, and emits a LayerZero message event.
+     */
     function sendWithLayerzero(
         uint32 _dstEid,
         address _tokenReceiver,
@@ -190,11 +229,11 @@ contract AvUSDBridging is
     }
 
     /**
-     * @dev Called when data is received from the protocol. It overrides the equivalent function in the parent contract.
-     * Protocol messages are defined as packets, comprised of the following parameters.
-     * @param _origin A struct containing information about where the packet came from.
-     * @param _guid A global unique identifier for tracking the packet.
-     * @param _payload Encoded message.
+     * @notice Receives messages sent via the LayerZero protocol.
+     * @param _origin Information about the origin chain.
+     * @param _guid Unique identifier for tracking the message.
+     * @param _payload Encoded payload of the message.
+     * @dev Decodes the payload, processes the token minting, and emits an event.
      */
     function _lzReceive(
         Origin calldata _origin,
@@ -226,7 +265,15 @@ contract AvUSDBridging is
     // | CCIP functions                                              |
     // └─────────────────────────────────────────────────────────────┘
 
-    /// @dev fee amount is calculated in the native token of the current chain
+    /**
+     * @notice Quotes the fee required to send a message via CCIP.
+     * @param _destinationChainSelector The selector for the destination chain.
+     * @param _tokenReceiver The recipient address on the destination chain.
+     * @param _tokenAmount The amount of tokens being sent.
+     * @param _isStaked Whether the tokens are staked or not.
+     * @return The fee in the native token required for sending the message.
+     * @dev The fee amount is calculated in the native token of the current chain.
+     */
     function quoteSendFeeWithCCIP(
         uint64 _destinationChainSelector,
         address _tokenReceiver,
@@ -236,7 +283,7 @@ contract AvUSDBridging is
         if (ccipRouter == address(0)) {
             revert NotAuthorizedError();
         }
-        Client.EVM2AnyMessage memory _message = _createSendMessage(
+        Client.EVM2AnyMessage memory _message = _createCCIPMessage(
             _destinationChainSelector,
             _tokenReceiver,
             _tokenAmount,
@@ -249,6 +296,14 @@ contract AvUSDBridging is
             );
     }
 
+    /**
+     * @notice Sends tokens across chains using Chainlink CCIP protocol.
+     * @param _destinationChainSelector The chain selector for the destination chain.
+     * @param _tokenReceiver The receiver's address on the destination chain.
+     * @param _tokenAmount The amount of tokens being transferred.
+     * @param _isStaked A boolean indicating if the tokens are staked or unstaked.
+     * @dev Transfers tokens across chains, burns them on the current chain, and emits a CCIP message event.
+     */
     function sendWithCCIP(
         uint64 _destinationChainSelector,
         address _tokenReceiver,
@@ -256,22 +311,26 @@ contract AvUSDBridging is
         bool _isStaked
     ) external payable nonReentrant {
         _tokenAmount = _transferFromAndBurnTokens(_tokenAmount, _isStaked);
-        Client.EVM2AnyMessage memory _message = _createSendMessage(
+
+        Client.EVM2AnyMessage memory _message = _createCCIPMessage(
             _destinationChainSelector,
             _tokenReceiver,
             _tokenAmount,
             _isStaked
         );
+
         IRouterClient _router = IRouterClient(ccipRouter);
         uint256 _fee = _router.getFee(_destinationChainSelector, _message);
         /// @dev fees don't change often enough to necessitate the implementation of a refund mechanism, so the contract can expect the exact amount to be sent
         if (_fee != msg.value) {
             revert InvalidParamError();
         }
+
         bytes32 _messageId = _router.ccipSend{value: _fee}(
             _destinationChainSelector,
             _message
         );
+
         emit CCIPMessageSent(
             _messageId,
             _destinationChainSelector,
@@ -282,7 +341,12 @@ contract AvUSDBridging is
         );
     }
 
-    /// @inheritdoc IAny2EVMMessageReceiver
+    /**
+     * @inheritdoc IAny2EVMMessageReceiver
+     * @notice Receives messages sent via the Chainlink CCIP protocol.
+     * @param message Information about the received message.
+     * @dev Verifies the sender, decodes the payload, processes the token minting, and emits an event.
+     */
     function ccipReceive(
         Client.Any2EVMMessage calldata _message
     ) external override {
@@ -314,7 +378,16 @@ contract AvUSDBridging is
         _mintWithOptionalStake(_tokenReceiver, _tokenAmount, _isStaked);
     }
 
-    function _createSendMessage(
+    /**
+     * @notice Creates a CCIP message for token transfer.
+     * @param _destinationChainSelector The chain selector for the destination chain.
+     * @param _tokenReceiver The receiver's address on the destination chain.
+     * @param _tokenAmount The amount of tokens being transferred.
+     * @param _isStaked A boolean indicating if the tokens are staked or unstaked.
+     * @return A CCIP message with the encoded transfer details.
+     * @dev This function builds the message to be sent across chains using CCIP.
+     */
+    function _createCCIPMessage(
         uint64 _destinationChainSelector,
         address _tokenReceiver,
         uint256 _tokenAmount,
@@ -341,19 +414,17 @@ contract AvUSDBridging is
             });
     }
 
-    /// @dev Indicates that this contract implements IAny2EVMMessageReceiver
-    function supportsInterface(
-        bytes4 _interfaceId
-    ) public pure virtual override returns (bool) {
-        return
-            _interfaceId == type(IAny2EVMMessageReceiver).interfaceId ||
-            _interfaceId == type(IERC165).interfaceId;
-    }
-
     // ┌─────────────────────────────────────────────────────────────┐
-    // | Common/Helper functions                                     |
+    // | Internal Utility Functions                                  |
     // └─────────────────────────────────────────────────────────────┘
 
+    /**
+     * @notice Transfers and burns tokens before cross-chain messaging.
+     * @param _tokenAmount The amount of tokens to transfer and burn.
+     * @param _isStaked A boolean indicating if the tokens are staked or unstaked.
+     * @return The actual amount of tokens transferred and burned.
+     * @dev Handles the token transfer logic and burns them for cross-chain transfers.
+     */
     function _transferFromAndBurnTokens(
         uint256 _tokenAmount,
         bool _isStaked
@@ -372,6 +443,13 @@ contract AvUSDBridging is
         return _tokenAmount;
     }
 
+    /**
+     * @notice Mints tokens to the receiver with optional staking.
+     * @param _tokenReceiver The address of the token receiver.
+     * @param _tokenAmount The amount of tokens to mint.
+     * @param _isStaked A boolean indicating if the tokens should be staked or unstaked.
+     * @dev If `_isStaked` is true, the tokens are staked in the savUSD vault.
+     */
     function _mintWithOptionalStake(
         address _tokenReceiver,
         uint256 _tokenAmount,
@@ -383,5 +461,14 @@ contract AvUSDBridging is
         } else {
             avUsd.mint(_tokenReceiver, _tokenAmount);
         }
+    }
+
+    /// @dev Indicates that this contract implements IAny2EVMMessageReceiver
+    function supportsInterface(
+        bytes4 _interfaceId
+    ) public pure virtual override returns (bool) {
+        return
+            _interfaceId == type(IAny2EVMMessageReceiver).interfaceId ||
+            _interfaceId == type(IERC165).interfaceId;
     }
 }
