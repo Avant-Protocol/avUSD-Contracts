@@ -9,9 +9,10 @@ import {OApp, Origin, MessagingFee} from "@layerzerolabs/lz-evm-oapp-v2/oapp/con
 import {MessagingReceipt} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
-import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
+import {IERC20, IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {IAvUSD} from "./interfaces/IAvUSD.sol";
 
@@ -21,6 +22,7 @@ contract AvUSDBridging is
     IAny2EVMMessageReceiver, // ─────────────────────────────────╮ CCIP message receiver interface
     IERC165 // ──────────────────────────────────────────────────╯ CCIP introspection for the message receiver
 {
+    using SafeERC20 for IERC20;
     // ┌─────────────────────────────────────────────────────────────┐
     // | Events                                                      |
     // └─────────────────────────────────────────────────────────────┘
@@ -344,7 +346,7 @@ contract AvUSDBridging is
     /**
      * @inheritdoc IAny2EVMMessageReceiver
      * @notice Receives messages sent via the Chainlink CCIP protocol.
-     * @param message Information about the received message.
+     * @param _message Information about the received message.
      * @dev Verifies the sender, decodes the payload, processes the token minting, and emits an event.
      */
     function ccipReceive(
@@ -430,14 +432,14 @@ contract AvUSDBridging is
         bool _isStaked
     ) internal returns (uint256) {
         if (_isStaked) {
-            savUsd.transferFrom(msg.sender, address(this), _tokenAmount);
+            IERC20(savUsd).safeTransferFrom(msg.sender, address(this), _tokenAmount);
             _tokenAmount = savUsd.redeem(
                 _tokenAmount,
                 address(this),
                 address(this)
             );
         } else {
-            avUsd.transferFrom(msg.sender, address(this), _tokenAmount);
+            IERC20(avUsd).safeTransferFrom(msg.sender, address(this), _tokenAmount);
         }
         avUsd.burn(_tokenAmount);
         return _tokenAmount;
