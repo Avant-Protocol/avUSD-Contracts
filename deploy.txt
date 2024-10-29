@@ -13,7 +13,18 @@ forge script script/WhitelistRedeemers.sol --slow --broadcast --chain-id 43113 -
 
 
 
+forge script script/bridging/BridgeTestFullDeployment.sol --slow --broadcast --chain-id 43113 --verify --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url "https://api.avax-test.network/ext/bc/C/rpc"
 
+[Avalanche Fuji]
+Deployed AvUSD to 0xF1c0DB770e77a961efde9DD11216e3833ad5c588
+Deployed StakedAvUSD to 0x412D48c3467177140B83C0dBdf786317C5604F4e
+Deployed MockToken to 0xDCA3173e80E983a8374E28583c6f39646DF9455d
+Deployed AvUSDMinting to 0x985B8fE9D1e76592f586795bD335B5b6C5af42aA
+Deployed AvUSDBridging to 0x47C7277224BbCc6Bed8d1735c54490FeaAb27387
+CCIP chainSelector to ARB Sepolia -> 3478487238524512106
+setCCIPWhitelistedPeer("3478487238524512106", "0xb6a98600a66C35985958C4DDA1599A4C15Ff9D70")
+layerzero EID of ARB Sepolia -> 40231
+setPeer(40231, ethers.zeroPadValue("0xb6a98600a66C35985958C4DDA1599A4C15Ff9D70", 32))
 
 
 forge script script/bridging/BridgeTestFullDeployment.sol --slow --broadcast --chain-id 421614 --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url "https://sepolia-rollup.arbitrum.io/rpc"
@@ -29,6 +40,11 @@ CCIP chainSelector to OP Sepolia -> 5224473277236331295
 setCCIPWhitelistedPeer("5224473277236331295", "0xE88EDcc956Cb979bF2d823EeFa1f7C6d69169285")
 layerzero EID of OP Sepolia -> 40232
 setPeer(40232, ethers.zeroPadValue("0xE88EDcc956Cb979bF2d823EeFa1f7C6d69169285", 32))
+
+CCIP chainSelector to Avalanche Fuji -> 14767482510784806043
+setCCIPWhitelistedPeer("14767482510784806043", "0x47C7277224BbCc6Bed8d1735c54490FeaAb27387")
+layerzero EID of Avalanche Fuji -> 40106
+setPeer(40106, ethers.zeroPadValue("0x47C7277224BbCc6Bed8d1735c54490FeaAb27387", 32))
 
 await b.quoteSendFeeWithLayerzero(40232, "0x19596e1D6cd97916514B5DBaA4730781eFE49975", "50000000000000000000", false, "0x000301001101000000000000000000000000001e8480")
 >87585188821179

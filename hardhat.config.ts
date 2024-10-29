@@ -10,6 +10,11 @@ const config: HardhatUserConfig = {
             url: `https://sepolia-rollup.arbitrum.io/rpc`,
             accounts: [`${process.env.PRIVATE_KEY}`],
         },
+        avalancheFuji: {
+            chainId: 43_113,
+            url: `https://api.avax-test.network/ext/bc/C/rpc`,
+            accounts: [`${process.env.PRIVATE_KEY}`],
+        },
         optimismSepolia: {
             chainId: 11_155_420,
             url: `https://sepolia.optimism.io`,

@@ -11,7 +11,7 @@ import "./interfaces/IAvUSDDefinitions.sol";
 /**
  * @title avUSD
  * @notice Stable Coin Contract
- * @dev Only a single approved minter can mint new tokens
+ * @dev Only approved minters can mint new tokens
  */
 contract AvUSD is Ownable2Step, ERC20Burnable, ERC20Permit, IAvUSDDefinitions {
 
