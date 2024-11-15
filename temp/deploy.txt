@@ -1,0 +1,220 @@
+# Fuji Testnet
+
+export RPC_URL=https://api.avax-test.network/ext/bc/C/rpc
+export PRIVATE_KEY=
+
+forge script script/FullDeployment.sol --slow --broadcast --chain-id 43113 --etherscan-api-key "verifyContract" --verify --build-info --build-info-path deployment --rpc-url $RPC_URL
+forge script script/StakeV2Deployment.sol --slow --broadcast --chain-id 43113 --etherscan-api-key "verifyContract" --verify --build-info --build-info-path deployment --rpc-url $RPC_URL
+forge script script/WhitelistMinter.sol --slow --broadcast --chain-id 43113 --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url $RPC_URL
+
+forge script script/GrantMinter.sol --slow --broadcast --chain-id 43113 --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url $RPC_URL
+forge script script/DeployMinting.sol --slow --broadcast --chain-id 43113 --etherscan-api-key "verifyContract" --verify --build-info --build-info-path deployment --rpc-url $RPC_URL
+forge script script/WhitelistRedeemers.sol --slow --broadcast --chain-id 43113 --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url $RPC_URL
+
+forge script script/bridging/BridgeTestFullDeployment.sol --slow --broadcast --chain-id 43113 --verify --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url "https://api.avax-test.network/ext/bc/C/rpc"
+
+[Avalanche Fuji]
+Deployed AvUSD to 0xF1c0DB770e77a961efde9DD11216e3833ad5c588
+Deployed StakedAvUSD to 0x412D48c3467177140B83C0dBdf786317C5604F4e
+Deployed MockToken to 0xDCA3173e80E983a8374E28583c6f39646DF9455d
+Deployed AvUSDMinting to 0x985B8fE9D1e76592f586795bD335B5b6C5af42aA
+Deployed AvUSDBridging to 0x47C7277224BbCc6Bed8d1735c54490FeaAb27387
+CCIP chainSelector to ARB Sepolia -> 3478487238524512106
+setCCIPWhitelistedPeer("3478487238524512106", "0xb6a98600a66C35985958C4DDA1599A4C15Ff9D70")
+layerzero EID of ARB Sepolia -> 40231
+setPeer(40231, ethers.zeroPadValue("0xb6a98600a66C35985958C4DDA1599A4C15Ff9D70", 32))
+
+forge script script/bridging/BridgeTestFullDeployment.sol --slow --broadcast --chain-id 421614 --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url "https://sepolia-rollup.arbitrum.io/rpc"
+
+[Arbitrum Sepolia]
+Deployed AvUSD to 0x70Bd20Fd83e55720e31a15d7e00005335145Aa91
+Deployed StakedAvUSD to 0x2ec9036BA625801866f313Cf5C007B4189B547f2
+Deployed MockToken to 0x1e5A613A720b7aE5bc68BE825a999Cb6f2dD0016
+Deployed AvUSDMinting to 0x4D18ae2ecba2804fFa7C6759D8c7d8B78343db03
+Deployed AvUSDBridging to 0xb6a98600a66C35985958C4DDA1599A4C15Ff9D70
+
+CCIP chainSelector to OP Sepolia -> 5224473277236331295
+setCCIPWhitelistedPeer("5224473277236331295", "0xE88EDcc956Cb979bF2d823EeFa1f7C6d69169285")
+layerzero EID of OP Sepolia -> 40232
+setPeer(40232, ethers.zeroPadValue("0xE88EDcc956Cb979bF2d823EeFa1f7C6d69169285", 32))
+
+CCIP chainSelector to Avalanche Fuji -> 14767482510784806043
+setCCIPWhitelistedPeer("14767482510784806043", "0x47C7277224BbCc6Bed8d1735c54490FeaAb27387")
+layerzero EID of Avalanche Fuji -> 40106
+setPeer(40106, ethers.zeroPadValue("0x47C7277224BbCc6Bed8d1735c54490FeaAb27387", 32))
+
+await b.quoteSendFeeWithLayerzero(40232, "0x19596e1D6cd97916514B5DBaA4730781eFE49975", "50000000000000000000", false, "0x000301001101000000000000000000000000001e8480")
+>87585188821179
+await b.sendWithLayerzero(40232, "0x19596e1D6cd97916514B5DBaA4730781eFE49975", "50000000000000000000", false, "0x000301001101000000000000000000000000001e8480", {value: "87585188821179"})
+txHash: 0x8663ffcb398ca1f2ab399a61847a122b9b7fada1d00632e10e82edb41890f842
+
+await b.quoteSendFeeWithCCIP("5224473277236331295", "0x19596e1D6cd97916514B5DBaA4730781eFE49975", "50000000000000000000", false)
+>41248506478866
+await b.sendWithCCIP("5224473277236331295", "0x19596e1D6cd97916514B5DBaA4730781eFE49975", "50000000000000000000", false)
+
+
+forge script script/bridging/BridgeTestFullDeployment.sol --slow --broadcast --chain-id 11155420 --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url "https://sepolia.optimism.io"
+
+[Optimism Sepolia]
+Deployed AvUSD to 0x24CED57dBe3Ce2080A8D4c94E768A0573d7a5f7A
+Deployed StakedAvUSD to 0x0d441bD787F7bF026dEf59e9e9D9F880fE59B5b4
+Deployed MockToken to 0x337c6D715fac1f8013d78567e154Ed38060ca2A6
+Deployed AvUSDMinting to 0xeebd674d85E02cF41c28eC87e4FA89F5a51554D7
+Deployed AvUSDBridging to 0xE88EDcc956Cb979bF2d823EeFa1f7C6d69169285
+CCIP chainSelector to ARB Sepolia -> 3478487238524512106
+setCCIPWhitelistedPeer("3478487238524512106", "0xb6a98600a66C35985958C4DDA1599A4C15Ff9D70")
+layerzero EID of ARB Sepolia -> 40231
+setPeer(40231, ethers.zeroPadValue("0xb6a98600a66C35985958C4DDA1599A4C15Ff9D70", 32))
+
+
+[Avalance]
+forge script script/AvalancheFullDeployment.sol --slow --broadcast --chain-id 43114 --etherscan-api-key "verifyContract" --verify --build-info --build-info-path deployment --rpc-url $RPC_URL
+
+== Logs ==
+  Deployer -> 0xA5Ab0683d4f4AD107766a9fc4dDd49B5a960e661
+  Balance -> 9374682264998903388
+  Deploying AvUSD...
+  Deployed AvUSD to 0x24dE8771bC5DdB3362Db529Fc3358F2df3A0E346
+  Deploying StakedAvUSDV2...
+  Deployed StakedAvUSDV2 to 0x06d47F3fb376649c3A9Dafe069B3D6E35572219E
+  Deploying AvUSDMinting...
+  Deployed AvUSDMinting to 0x1499CB3197427B78DC0e2d356A1e0E4149E0ED51
+  Cost -> 0
+  Balance -> 9374682264998903388
+
+## Setting up 1 EVM.
+
+==========================
+
+Chain 43114
+
+Estimated gas price: 50.000000001 gwei
+
+Estimated total gas used for script: 11807903
+
+Estimated amount required: 0.590395150011807903 ETH
+
+==========================
+
+##### avalanche
+✅  [Success]Hash: 0x7d558f8bf8e53aff5b11d299de2e3293d5a31edfd2d8da6720ab58c291183b5e
+Contract Address: 0x24dE8771bC5DdB3362Db529Fc3358F2df3A0E346
+Block: 53120573
+Paid: 0.037165150001486606 ETH (1486606 gas * 25.000000001 gwei)
+
+
+##### avalanche
+✅  [Success]Hash: 0x5c8ff64799278f51c4ca6f49a32fac02ef53b2c3211384677f476204f5a71d0e
+Contract Address: 0x06d47F3fb376649c3A9Dafe069B3D6E35572219E
+Block: 53120575
+Paid: 0.096646700003865868 ETH (3865868 gas * 25.000000001 gwei)
+
+
+##### avalanche
+✅  [Success]Hash: 0xd2402a666de1cdf5ac7a610b5dfe05017c4fcfd724ba067274748ccdd8554e13
+Contract Address: 0x1499CB3197427B78DC0e2d356A1e0E4149E0ED51
+Block: 53120577
+Paid: 0.086604425003464177 ETH (3464177 gas * 25.000000001 gwei)
+
+
+##### avalanche
+✅  [Success]Hash: 0x05687d56fd3a126bec4daec8606f148cbbe9c51fe394739cf37ed996bf3258ff
+Block: 53120579
+Paid: 0.001194850000047794 ETH (47794 gas * 25.000000001 gwei)
+
+
+##### avalanche
+✅  [Success]Hash: 0x4163fe37da9a6969f07e4f68b72906b471d5c047a933373cef4d310dded9a2a8
+Block: 53120581
+Paid: 0.001232625000049305 ETH (49305 gas * 25.000000001 gwei)
+
+
+##### avalanche
+✅  [Success]Hash: 0xc7152ff835e54ceef13ebc1ae116d0a58463f5cab36102647d05a1b56d28c23c
+Block: 53120583
+Paid: 0.001232325000049293 ETH (49293 gas * 25.000000001 gwei)
+
+
+##### avalanche
+✅  [Success]Hash: 0x144cb2a94a2ee054da0f9381e098b56f0cf303047945bf722af153cc00655dd8
+Block: 53120585
+Paid: 0.001232325000049293 ETH (49293 gas * 25.000000001 gwei)
+
+
+##### avalanche
+✅  [Success]Hash: 0xfa3474378e9b0506fef3fb30a5f3acb98422dc1273e983a851c31365edcb7ace
+Block: 53120587
+Paid: 0.001232325000049293 ETH (49293 gas * 25.000000001 gwei)
+
+✅ Sequence #1 on avalanche | Total Paid: 0.226540725009061629 ETH (9061629 gas * avg 25.000000001 gwei)
+                                                                                                                                                                                                                                                                                     
+
+==========================
+
+ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
+##
+Start verification for (4) contracts
+Start verifying contract `0x24dE8771bC5DdB3362Db529Fc3358F2df3A0E346` deployed on avalanche
+
+Submitting verification for [contracts/AvUSD.sol:AvUSD] 0x24dE8771bC5DdB3362Db529Fc3358F2df3A0E346.
+Submitted contract for verification:
+        Response: `OK`
+        GUID: `e5f1623f-1649-50eb-992a-3d8eb8f5de62`
+        URL: https://snowtrace.io/address/0x24de8771bc5ddb3362db529fc3358f2df3a0e346
+Contract verification status:
+Response: `NOTOK`
+Details: `Pending in queue`
+Contract verification status:
+Response: `NOTOK`
+Details: `Pending in queue`
+Contract verification status:
+Response: `OK`
+Details: `Pass - Verified`
+Contract successfully verified
+Start verifying contract `0x06d47F3fb376649c3A9Dafe069B3D6E35572219E` deployed on avalanche
+
+Submitting verification for [contracts/StakedAvUSDV2.sol:StakedAvUSDV2] 0x06d47F3fb376649c3A9Dafe069B3D6E35572219E.
+Submitted contract for verification:
+        Response: `OK`
+        GUID: `3499fa15-18e9-55b9-a46e-a5a4b63583f6`
+        URL: https://snowtrace.io/address/0x06d47f3fb376649c3a9dafe069b3d6e35572219e
+Contract verification status:
+Response: `NOTOK`
+Details: `Pending in queue`
+Contract verification status:
+Response: `OK`
+Details: `Pass - Verified`
+Contract successfully verified
+Start verifying contract `0xf2af724f421B072D5C07C68A472EF391ef47bCbD` deployed on avalanche
+
+Submitting verification for [contracts/AvUSDSilo.sol:AvUSDSilo] 0xf2af724f421B072D5C07C68A472EF391ef47bCbD.
+Submitted contract for verification:
+        Response: `OK`
+        GUID: `d4044b0d-3933-5f5e-b54c-14bc97df81d7`
+        URL: https://snowtrace.io/address/0xf2af724f421b072d5c07c68a472ef391ef47bcbd
+Contract verification status:
+Response: `NOTOK`
+Details: `Pending in queue`
+Contract verification status:
+Response: `OK`
+Details: `Pass - Verified`
+Contract successfully verified
+Start verifying contract `0x1499CB3197427B78DC0e2d356A1e0E4149E0ED51` deployed on avalanche
+
+Submitting verification for [contracts/AvUSDMinting.sol:AvUSDMinting] 0x1499CB3197427B78DC0e2d356A1e0E4149E0ED51.
+Submitted contract for verification:
+        Response: `OK`
+        GUID: `f057ebb2-a582-57b8-b192-b4030b7fac73`
+        URL: https://snowtrace.io/address/0x1499cb3197427b78dc0e2d356a1e0e4149e0ed51
+Contract verification status:
+Response: `NOTOK`
+Details: `Pending in queue`
+Contract verification status:
+Response: `OK`
+Details: `Pass - Verified`
+Contract successfully verified
+All (4) contracts were verified!
+
+Transactions saved to: /home/user/projects/avUSD-Contracts/broadcast/AvalancheFullDeployment.sol/43114/run-latest.json
+
+Sensitive values saved to: /home/user/projects/avUSD-Contracts/forge-cache/AvalancheFullDeployment.sol/43114/run-latest.json

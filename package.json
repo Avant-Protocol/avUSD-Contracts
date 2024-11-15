@@ -47,7 +47,7 @@
     "@types/chai": "^4.3.20",
     "@types/mocha": "^10.0.9",
     "cross-env": "7.0.0",
-    "dotenv": "16.0.3",
+    "dotenv": "^16.0.3",
     "eslint": "8.29.0",
     "ethers": "^6.13.4",
     "hardhat": "^2.22.13",
@@ -59,5 +59,9 @@
     "ts-node": "10.9.1",
     "typechain": "^8.1.1",
     "typescript": "4.9.4"
+  },
+  "dependencies": {
+    "@types/find-config": "^1.0.4",
+    "find-config": "^1.0.0"
   }
 }

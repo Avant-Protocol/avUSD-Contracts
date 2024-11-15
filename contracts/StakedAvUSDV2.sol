@@ -44,7 +44,7 @@ contract StakedAvUSDV2 is IStakedAvUSDCooldown, StakedAvUSD {
   /// @param _owner The address of the admin role.
   constructor(IERC20 _asset, address initialRewarder, address _owner) StakedAvUSD(_asset, initialRewarder, _owner) {
     silo = new AvUSDSilo(address(this), address(_asset));
-    cooldownDuration = MAX_COOLDOWN_DURATION;
+    cooldownDuration = 1 weeks;
   }
 
   /* ------------- EXTERNAL ------------- */
