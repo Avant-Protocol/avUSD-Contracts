@@ -26,6 +26,11 @@ const config: HardhatUserConfig = {
             url: `https://sepolia-rollup.arbitrum.io/rpc`,
             accounts,
         },
+        avalanche: {
+            chainId: 43_114,
+            url: `https://api.avax.network/ext/bc/C/rpc`,
+            accounts,
+        },
         avalancheFuji: {
             chainId: 43_113,
             url: `https://api.avax-test.network/ext/bc/C/rpc`,
