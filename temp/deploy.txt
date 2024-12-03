@@ -11,9 +11,8 @@ forge script script/GrantMinter.sol --slow --broadcast --chain-id 43113 --ethers
 forge script script/DeployMinting.sol --slow --broadcast --chain-id 43113 --etherscan-api-key "verifyContract" --verify --build-info --build-info-path deployment --rpc-url $RPC_URL
 forge script script/WhitelistRedeemers.sol --slow --broadcast --chain-id 43113 --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url $RPC_URL
 
-forge script script/bridging/BridgeTestFullDeployment.sol --slow --broadcast --chain-id 43113 --verify --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url "https://api.avax-test.network/ext/bc/C/rpc"
-
 [Avalanche Fuji]
+> forge script script/bridging/BridgeTestFullDeployment.sol --slow --broadcast --chain-id 43113 --verify --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url "https://api.avax-test.network/ext/bc/C/rpc"
 Deployed AvUSD to 0xF1c0DB770e77a961efde9DD11216e3833ad5c588
 Deployed StakedAvUSD to 0x412D48c3467177140B83C0dBdf786317C5604F4e
 Deployed MockToken to 0xDCA3173e80E983a8374E28583c6f39646DF9455d
@@ -24,9 +23,9 @@ setCCIPWhitelistedPeer("3478487238524512106", "0xb6a98600a66C35985958C4DDA1599A4
 layerzero EID of ARB Sepolia -> 40231
 setPeer(40231, ethers.zeroPadValue("0xb6a98600a66C35985958C4DDA1599A4C15Ff9D70", 32))
 
-forge script script/bridging/BridgeTestFullDeployment.sol --slow --broadcast --chain-id 421614 --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url "https://sepolia-rollup.arbitrum.io/rpc"
 
 [Arbitrum Sepolia]
+> forge script script/bridging/BridgeTestFullDeployment.sol --slow --broadcast --chain-id 421614 --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url "https://sepolia-rollup.arbitrum.io/rpc"
 Deployed AvUSD to 0x70Bd20Fd83e55720e31a15d7e00005335145Aa91
 Deployed StakedAvUSD to 0x2ec9036BA625801866f313Cf5C007B4189B547f2
 Deployed MockToken to 0x1e5A613A720b7aE5bc68BE825a999Cb6f2dD0016
@@ -53,9 +52,8 @@ await b.quoteSendFeeWithCCIP("5224473277236331295", "0x19596e1D6cd97916514B5DBaA
 await b.sendWithCCIP("5224473277236331295", "0x19596e1D6cd97916514B5DBaA4730781eFE49975", "50000000000000000000", false)
 
 
-forge script script/bridging/BridgeTestFullDeployment.sol --slow --broadcast --chain-id 11155420 --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url "https://sepolia.optimism.io"
-
 [Optimism Sepolia]
+> forge script script/bridging/BridgeTestFullDeployment.sol --slow --broadcast --chain-id 11155420 --etherscan-api-key "verifyContract" --build-info --build-info-path deployment --rpc-url "https://sepolia.optimism.io"
 Deployed AvUSD to 0x24CED57dBe3Ce2080A8D4c94E768A0573d7a5f7A
 Deployed StakedAvUSD to 0x0d441bD787F7bF026dEf59e9e9D9F880fE59B5b4
 Deployed MockToken to 0x337c6D715fac1f8013d78567e154Ed38060ca2A6
@@ -67,7 +65,7 @@ layerzero EID of ARB Sepolia -> 40231
 setPeer(40231, ethers.zeroPadValue("0xb6a98600a66C35985958C4DDA1599A4C15Ff9D70", 32))
 
 
-[Avalance]
+[Avalanche]
 forge script script/AvalancheFullDeployment.sol --slow --broadcast --chain-id 43114 --etherscan-api-key "verifyContract" --verify --build-info --build-info-path deployment --rpc-url $RPC_URL
 
 == Logs ==
