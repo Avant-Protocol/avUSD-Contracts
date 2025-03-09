@@ -15,6 +15,7 @@ import "../../../contracts/AvUSD.sol";
 import "../../../contracts/interfaces/IAvUSDMinting.sol";
 import "../../../contracts/interfaces/IAvUSDMintingEvents.sol";
 import "../../../contracts/AvUSDMinting.sol";
+import "../../../contracts/AvUSDMintingV2.sol";
 import "../../../contracts/interfaces/ISingleAdminAccessControl.sol";
 import "../../../contracts/interfaces/IAvUSDDefinitions.sol";
 
@@ -27,7 +28,7 @@ contract MintingBaseSetup is Test, IAvUSDMintingEvents, IAvUSDDefinitions {
   MockToken internal USDCToken;
   MockToken internal USDTToken;
   MockToken internal token;
-  AvUSDMinting internal AvUSDMintingContract;
+  AvUSDMintingV2 internal AvUSDMintingContract;
   SigUtils internal sigUtils;
   SigUtils internal sigUtilsAvUSD;
 
@@ -203,7 +204,7 @@ contract MintingBaseSetup is Test, IAvUSDMintingEvents, IAvUSDDefinitions {
 
     // Set the roles
     vm.startPrank(owner);
-    AvUSDMintingContract = new AvUSDMinting(
+    AvUSDMintingContract = new AvUSDMintingV2(
       IAvUSD(address(avusdToken)),
       IWAVAX(address(token)),
       assets,

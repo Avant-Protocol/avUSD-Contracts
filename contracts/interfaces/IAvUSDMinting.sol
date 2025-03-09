@@ -6,17 +6,16 @@ pragma solidity 0.8.20;
 import "./IAvUSDMintingEvents.sol";
 
 interface IAvUSDMinting is IAvUSDMintingEvents {
-  enum Role {
-    Minter,
-    Redeemer
-  }
 
   enum OrderType {
     MINT,
     REDEEM
   }
 
-  enum SignatureType {EIP712}
+  enum SignatureType {
+    EIP712,
+    EIP1271
+  }
 
   enum DelegatedSignerStatus {
     REJECTED,
@@ -55,7 +54,11 @@ interface IAvUSDMinting is IAvUSDMintingEvents {
   error InvalidRoute();
   error UnsupportedAsset();
   error NoAssetsProvided();
+  error InvalidCollateralToStablecoinRatio();
   error InvalidSignature();
+  error InvalidEIP712Signature();
+  error InvalidEIP1271Signature();
+  error UnknownSignatureType();
   error InvalidNonce();
   error SignatureExpired();
   error TransferFailed();
