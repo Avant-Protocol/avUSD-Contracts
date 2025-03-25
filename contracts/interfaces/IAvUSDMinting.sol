@@ -58,7 +58,6 @@ interface IAvUSDMinting is IAvUSDMintingEvents {
   error InvalidSignature();
   error InvalidEIP712Signature();
   error InvalidEIP1271Signature();
-  error UnknownSignatureType();
   error InvalidNonce();
   error SignatureExpired();
   error TransferFailed();

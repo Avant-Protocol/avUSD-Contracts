@@ -406,14 +406,13 @@ contract AvUSDMintingV2 is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGu
       if (signer != order.benefactor && delegatedSigner[signer][order.benefactor] != DelegatedSignerStatus.ACCEPTED) {
         revert InvalidEIP712Signature();
       }
-    } else if (signature.signature_type == SignatureType.EIP1271) {
+    } else {
+      // SignatureType == EIP1271
       if (
         IERC1271(order.benefactor).isValidSignature(taker_order_hash, signature.signature_bytes) != EIP1271_MAGICVALUE
       ) {
         revert InvalidEIP1271Signature();
       }
-    } else {
-      revert UnknownSignatureType();
     }
     if (order.beneficiary == address(0)) revert InvalidAddress();
     if (order.collateral_amount == 0) revert InvalidAmount();
