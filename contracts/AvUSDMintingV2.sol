@@ -476,16 +476,23 @@ contract AvUSDMintingV2 is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGu
     uint8 avusdDecimals = IERC20Metadata(address(avusd)).decimals();
     uint8 collateralDecimals = IERC20Metadata(address(collateralAsset)).decimals();
 
+    uint256 scale;
     uint256 normalizedCollateralAmount;
-    uint256 scale = avusdDecimals > collateralDecimals
-        ? 10 ** (avusdDecimals - collateralDecimals)
-        : 10 ** (collateralDecimals - avusdDecimals);
+    uint256 difference;
+
+    unchecked {
+      scale = avusdDecimals > collateralDecimals
+          ? 10 ** (avusdDecimals - collateralDecimals)
+          : 10 ** (collateralDecimals - avusdDecimals);
+    }
 
     normalizedCollateralAmount = avusdDecimals > collateralDecimals ? collateralAmount * scale : collateralAmount / scale;
 
-    uint256 difference = normalizedCollateralAmount > avusdAmount
-      ? normalizedCollateralAmount - avusdAmount
-      : avusdAmount - normalizedCollateralAmount;
+    unchecked {
+      difference = normalizedCollateralAmount > avusdAmount
+        ? normalizedCollateralAmount - avusdAmount
+        : avusdAmount - normalizedCollateralAmount;
+    }
 
     uint256 differenceInBps = (difference * STABLES_RATIO_MULTIPLIER) / avusdAmount;
 
