@@ -16,7 +16,6 @@ import "../contracts/mock/MockToken.sol";
 contract FullDeployment is Script, DeploymentUtils {
   struct Contracts {
     MockToken mockTokenA;
-    IWAVAX wavax;
     AvUSD AvUSDToken;
     StakedAvUSDV2 stakedAvUSD;
     AvUSDMintingV2 avUSDMintingContract;
@@ -45,8 +44,6 @@ contract FullDeployment is Script, DeploymentUtils {
     console.log("Balance -> %s", deployerBalance);
 
     Contracts memory contracts;
-
-    contracts.wavax = IWAVAX(address(0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9));
 
     vm.startBroadcast(deployerPrivateKey);
 
@@ -79,7 +76,7 @@ contract FullDeployment is Script, DeploymentUtils {
     custodians[0] = address(0x19596e1D6cd97916514B5DBaA4730781eFE49975);
 
     console.log("Deploying AvUSDMinting...");
-    contracts.avUSDMintingContract = new AvUSDMintingV2(iAvUSD, contracts.wavax, assets, custodians, deployerAddress, MAX_AVUSD_MINT_PER_BLOCK, MAX_AVUSD_REDEEM_PER_BLOCK);
+    contracts.avUSDMintingContract = new AvUSDMintingV2(iAvUSD, assets, custodians, deployerAddress, MAX_AVUSD_MINT_PER_BLOCK, MAX_AVUSD_REDEEM_PER_BLOCK);
     console.log("Deployed AvUSDMinting to %s", address(contracts.avUSDMintingContract));
 
     // give minting contract AvUSD minter role

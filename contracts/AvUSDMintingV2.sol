@@ -13,7 +13,6 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 import "./SingleAdminAccessControl.sol";
 import "./interfaces/IAvUSDMinting.sol";
-import "./interfaces/IWAVAX.sol";
 import "./interfaces/IAvUSD.sol";
 
 /**
@@ -67,8 +66,6 @@ contract AvUSDMintingV2 is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGu
 
   /// @notice required ratio for route
   uint256 private constant ROUTE_REQUIRED_RATIO = 100_00; // 100%
-
-  IWAVAX private immutable WAVAX;
 
   /// @notice stablecoin price ratio multiplier
   uint128 private constant STABLES_RATIO_MULTIPLIER = 100_00;
@@ -135,7 +132,6 @@ contract AvUSDMintingV2 is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGu
 
   constructor(
     IAvUSD _avusd,
-    IWAVAX _wavax,
     address[] memory _assets,
     address[] memory _custodians,
     address _admin,
@@ -143,11 +139,9 @@ contract AvUSDMintingV2 is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGu
     uint256 _maxRedeemPerBlock
   ) {
     if (address(_avusd) == address(0)) revert InvalidAvUSDAddress();
-    if (address(_wavax) == address(0)) revert InvalidZeroAddress();
     if (_assets.length == 0) revert NoAssetsProvided();
     if (_admin == address(0)) revert InvalidZeroAddress();
     avusd = _avusd;
-    WAVAX = _wavax;
 
     _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
@@ -203,17 +197,13 @@ contract AvUSDMintingV2 is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGu
     if (order.order_type != OrderType.MINT) revert InvalidOrder();
     verifyOrder(order, signature);
     if (!verifyRoute(route)) revert InvalidRoute();
+
     _deduplicateOrder(order.benefactor, order.nonce);
 
-    if (order.collateral_asset == address(WAVAX)) {
-      _transferEthCollateral(
-        order.collateral_amount, order.collateral_asset, order.benefactor, route.addresses, route.ratios
-      );
-    } else {
-      _transferCollateral(
-        order.collateral_amount, order.collateral_asset, order.benefactor, route.addresses, route.ratios
-      );
-    }
+    _transferCollateral(
+      order.collateral_amount, order.collateral_asset, order.benefactor, route.addresses, route.ratios
+    );
+
     avusd.mint(order.beneficiary, order.avusd_amount);
     emit Mint(
       msg.sender,
@@ -537,36 +527,6 @@ contract AvUSDMintingV2 is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGu
     }
     uint256 remainingBalance = amount - totalTransferred;
     token.safeTransferFrom(benefactor, addresses[addresses.length - 1], remainingBalance);
-  }
-
-  /// @notice transfer supported asset to array of custody addresses per defined ratio
-  function _transferEthCollateral(
-    uint256 amount,
-    address asset,
-    address benefactor,
-    address[] calldata addresses,
-    uint256[] calldata ratios
-  ) internal {
-    if (!_supportedAssets.contains(asset) || asset != address(WAVAX)) revert UnsupportedAsset();
-    IERC20 token = IERC20(asset);
-    token.safeTransferFrom(benefactor, address(this), amount);
-
-    // unwrap
-    WAVAX.withdraw(amount);
-
-    uint256 totalTransferred = 0;
-    for (uint256 i = 0; i < addresses.length - 1;) {
-      uint256 amountToTransfer = (amount * ratios[i]) / ROUTE_REQUIRED_RATIO;
-      (bool success,) = addresses[i].call{value: amountToTransfer}("");
-      if (!success) revert TransferFailed();
-      totalTransferred += amountToTransfer;
-      unchecked {
-        ++i;
-      }
-    }
-    uint256 remainingBalance = amount - totalTransferred;
-    (bool success,) = addresses[addresses.length - 1].call{value: remainingBalance}("");
-    if (!success) revert TransferFailed();
   }
 
   /// @notice Sets the max mintPerBlock limit

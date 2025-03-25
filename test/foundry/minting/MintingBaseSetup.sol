@@ -206,7 +206,6 @@ contract MintingBaseSetup is Test, IAvUSDMintingEvents, IAvUSDDefinitions {
     vm.startPrank(owner);
     AvUSDMintingContract = new AvUSDMintingV2(
       IAvUSD(address(avusdToken)),
-      IWAVAX(address(token)),
       assets,
       custodians,
       owner,

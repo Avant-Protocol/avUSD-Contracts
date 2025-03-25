@@ -31,7 +31,6 @@ contract DeployMinting is Script, DeploymentUtils {
 
     vm.startBroadcast(deployerPrivateKey);
 
-    IWAVAX wavax = IWAVAX(0xd00ae08403B9bbb9124bB305C09058E32C39A48c); // WAVAX on Fuji Testnet
     IAvUSD iAvUSD = IAvUSD(0xF1c0DB770e77a961efde9DD11216e3833ad5c588);
     
     address[] memory assets = new address[](2);
@@ -42,7 +41,7 @@ contract DeployMinting is Script, DeploymentUtils {
     custodians[0] = address(0xF21d5A3AE15Cb4fFd11fE0819650c100Ad6DD203);
 
     console.log("Deploying AvUSDMintingV2...");
-    AvUSDMintingV2 avUSDMintingContract = new AvUSDMintingV2(iAvUSD, wavax, assets, custodians, deployerAddress, MAX_AVUSD_MINT_PER_BLOCK, MAX_AVUSD_REDEEM_PER_BLOCK);
+    AvUSDMintingV2 avUSDMintingContract = new AvUSDMintingV2(iAvUSD, assets, custodians, deployerAddress, MAX_AVUSD_MINT_PER_BLOCK, MAX_AVUSD_REDEEM_PER_BLOCK);
     console.log("Deployed AvUSDMintingV2 to %s", address(avUSDMintingContract));
 
     // give minting contract AvUSD minter role
