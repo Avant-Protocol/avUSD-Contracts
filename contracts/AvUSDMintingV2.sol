@@ -71,7 +71,7 @@ contract AvUSDMintingV2 is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGu
   IWAVAX private immutable WAVAX;
 
   /// @notice stablecoin price ratio multiplier
-  uint128 private constant STABLES_RATIO_MULTIPLIER = 10_000;
+  uint128 private constant STABLES_RATIO_MULTIPLIER = 100_00;
 
   /* --------------- STATE VARIABLES --------------- */
 
