@@ -390,20 +390,23 @@ contract AvUSDMintingV2 is IAvUSDMinting, SingleAdminAccessControl, ReentrancyGu
     override
     returns (bytes32 taker_order_hash)
   {
-    taker_order_hash = hashOrder(order);
-    if (signature.signature_type == SignatureType.EIP712) {
-      address signer = ECDSA.recover(taker_order_hash, signature.signature_bytes);
-      if (signer != order.benefactor && delegatedSigner[signer][order.benefactor] != DelegatedSignerStatus.ACCEPTED) {
-        revert InvalidEIP712Signature();
-      }
-    } else {
-      // SignatureType == EIP1271
-      if (
-        IERC1271(order.benefactor).isValidSignature(taker_order_hash, signature.signature_bytes) != EIP1271_MAGICVALUE
-      ) {
-        revert InvalidEIP1271Signature();
-      }
-    }
+   taker_order_hash = hashOrder(order);
+
+if (signature.signature_type == SignatureType.EIP712) {
+  // Verify EIP712 signature using ECDSA
+  address signer = ECDSA.recover(taker_order_hash, signature.signature_bytes);
+  if (signer != order.benefactor && delegatedSigner[signer][order.benefactor] != DelegatedSignerStatus.ACCEPTED) {
+    revert InvalidEIP712Signature();
+  }
+} else {
+  // Assume EIP1271 as fallback; only two supported types (EIP712, EIP1271)
+  // Removed 'UnknownSignatureType' revert for gas optimization and cleaner branching
+  if (
+    IERC1271(order.benefactor).isValidSignature(taker_order_hash, signature.signature_bytes) != EIP1271_MAGICVALUE
+  ) {
+    revert InvalidEIP1271Signature();
+  }
+} 
     if (order.beneficiary == address(0)) revert InvalidAddress();
     if (order.collateral_amount == 0) revert InvalidAmount();
     if (order.avusd_amount == 0) revert InvalidAmount();
